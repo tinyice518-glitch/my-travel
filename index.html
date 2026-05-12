@@ -14,53 +14,60 @@
             --radius: 24px; --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
         }
         body { background: var(--bg); font-family: -apple-system, "PingFang TC", sans-serif; margin: 0;
-            padding-bottom: 120px; color: var(--text); -webkit-font-smoothing: antialiased; }
+        padding-bottom: 120px; color: var(--text); -webkit-font-smoothing: antialiased; }
         [v-cloak] { display: none; }
         input, select, textarea { border: none; background: transparent; outline: none; font-family: inherit;
-            width: 100%; color: inherit; }
+        width: 100%; color: inherit; }
         .header { background: white; padding: 60px 25px 25px;
-            border-radius: 0 0 35px 35px; box-shadow: var(--shadow); }
+        border-radius: 0 0 35px 35px; box-shadow: var(--shadow); }
         .card { background: var(--card);
-            margin: 15px; padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.02);
+        margin: 15px; padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.02);
         }
         .date-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 20px; scrollbar-width: none; }
         .date-item { min-width: 65px; height: 85px; background: white; border-radius: 20px; display: flex;
-            flex-direction: column; align-items: center; justify-content: center; transition: 0.3s; }
+        flex-direction: column; align-items: center; justify-content: center; transition: 0.3s; }
         .date-item.active { background: var(--primary);
-            color: white; transform: scale(1.05); box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
+        color: white; transform: scale(1.05); box-shadow: 0 10px 20px rgba(79, 70, 229, 0.2);
         }
         .timeline-gap { position: relative; margin-left: 55px; height: 35px; display: flex; align-items: center; }
         .timeline-gap::before { content: ''; position: absolute; left: -14px; top: 0; bottom: 0;
-            width: 2px; border-left: 2px dashed #e2e8f0; }
+        width: 2px; border-left: 2px dashed #e2e8f0; }
         .gap-text { font-size: 11px; font-weight: 700;
-            color: #cbd5e1; margin-left: 10px; }
+        color: #cbd5e1; margin-left: 10px; }
         .row-item { background: #f8fafc; padding: 16px; border-radius: 18px;
-            margin-bottom: 12px; display: flex; align-items: center; }
+        margin-bottom: 12px; display: flex; align-items: center; }
         .flight-info-box { background: #f1f5f9; border-radius: 18px;
-            padding: 20px; margin-bottom: 15px; display: flex; align-items: center; }
+        padding: 20px; margin-bottom: 15px; display: flex; align-items: center; }
         .small-label { font-size: 11px;
-            color: var(--sub); font-weight: bold; margin-bottom: 2px; }
+        color: var(--sub); font-weight: bold; margin-bottom: 2px; }
         .dock { position: fixed; bottom: 25px;
-            left: 50%; transform: translateX(-50%); width: 90%; max-width: 420px; height: 75px; background: #0f172a; border-radius: 35px; display: flex; align-items: center; justify-content: space-around;
-            z-index: 1000; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
+        left: 50%; transform: translateX(-50%); width: 95%; max-width: 500px; height: 75px; background: #0f172a; border-radius: 35px; display: flex; align-items: center; justify-content: space-around;
+        z-index: 1000; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
         .dock-item { color: rgba(255,255,255,0.4);
-            font-size: 10px; text-align: center; font-weight: bold; cursor: pointer; }
+        font-size: 10px; text-align: center; font-weight: bold; cursor: pointer; }
         .dock-item.active { color: white; }
         .dock-item div { font-size: 22px; margin-bottom: 2px; }
         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex;
-            align-items: center; justify-content: center; z-index: 2000; }
+        align-items: center; justify-content: center; z-index: 2000; }
         .modal-content { background: white; width: 88%;
-            max-width: 380px; padding: 30px; border-radius: 35px; max-height: 85vh; overflow-y: auto;
+        max-width: 380px; padding: 30px; border-radius: 35px; max-height: 85vh; overflow-y: auto;
         }
         .input-pill { background: #f1f5f9; padding: 14px 18px; border-radius: 16px; margin-bottom: 12px; }
         label { font-size: 12px; font-weight: 800; color: var(--sub);
-            margin: 0 0 5px 5px; display: block; }
+        margin: 0 0 5px 5px; display: block; }
         .map-link { color: var(--primary);
-            font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 4px; display: inline-block;
+        font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 4px; display: inline-block;
         }
         .btn-action { width: 100%; padding: 12px; border-radius: 12px; font-weight: 900; border: none;
-            cursor: pointer; margin-top: 10px; }
-        .itinerary-img { width: 100%; height: 120px; object-fit: cover; border-radius: 15px; margin-bottom: 10px; }
+        cursor: pointer; margin-top: 10px; }
+        .img-container { display: flex;
+        gap: 8px; overflow-x: auto; margin-top: 8px; padding-bottom: 4px; scrollbar-width: none;
+        }
+        .itinerary-img { width: 80px; height: 80px; object-fit: cover; border-radius: 12px; flex-shrink: 0; cursor: zoom-in; }
+        .weather-card { display: flex; align-items: center; justify-content: space-between; background: #f1f5f9; padding: 15px 20px; border-radius: 20px; cursor: pointer; }
+        .note-box { background: #f1f5f9; border-radius: 12px; padding: 10px; font-size: 11px; color: var(--sub); margin-top: 8px; line-height: 1.4; }
+        .filter-tag { padding: 6px 12px; border-radius: 10px; font-size: 11px; font-weight: 800; background: #f1f5f9; color: var(--sub); cursor: pointer; }
+        .filter-tag.active { background: var(--primary); color: white; }
     </style>
 </head>
 <body>
@@ -78,6 +85,28 @@
                 </div>
             </div>
         </header>
+
+        <div class="card" v-if="weatherList.length > 0 && weatherCity">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 style="margin:0; font-size:16px;">🌡️ 當地天氣 ({{ weatherCity }})</h3>
+                <button @click.stop="fetchWeather" style="font-size:12px; color:var(--primary); border:none; background:none; font-weight:800; padding: 5px;">更新</button>
+            </div>
+            <div class="weather-card" @click="openGoogleWeather">
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <span style="font-size:32px;">{{ currentWeather.icon || '❓' }}</span>
+                    <div>
+                        <div style="font-size:18px; font-weight:900;">
+                            <span style="color:#ef4444;">{{ currentWeather.tempMax != null ? currentWeather.tempMax + '°' : '--°' }}</span>
+                            <span style="color:#cbd5e1; margin:0 5px; font-weight:300;">/</span>
+                            <span style="color:#3b82f6;">{{ currentWeather.tempMin != null ? currentWeather.tempMin + '°' : '--°' }}</span>
+                        </div>
+                        <div style="font-size:11px; font-weight:700; color:var(--sub);">{{ dates[selectedDateIndex]?.day }} 預報</div>
+                    </div>
+                </div>
+                <div style="font-size:10px; color:var(--sub); text-align:right; line-height: 1.2;">查看 Google<br>完整預報 ↗</div>
+            </div>
+        </div>
+
         <div class="date-scroll">
             <div v-for="(d, i) in dates" :key="i" @click="selectedDateIndex = i" class="date-item" :class="{active: selectedDateIndex === i}">
                 <span style="font-size:10px; font-weight:800; opacity:0.7;">{{ d.week }}</span>
@@ -97,22 +126,74 @@
                                 <div style="font-size:26px; margin-right:15px;">{{ getIcon(element.type) }}</div>
                                 <div style="flex:1">
                                     <div style="font-weight:900; font-size:17px;">{{ element.name || '未命名項目' }}</div>
-                                    <div style="font-size:13px; font-weight:700; color:var(--primary);">{{ element.startH }}:{{ element.startM }} - {{ element.endH }}:{{ element.endM }} ‧ {{ getTransIcon(element.trans) }}</div>
+                                    <div style="font-size:13px; font-weight:700; color:var(--primary);">
+                                        {{ element.startH }}:{{ element.startM }} - {{ element.endH }}:{{ element.endM }} 
+                                        <span v-if="element.trans && element.trans !== '空白'">‧ {{ getTransIcon(element.trans) }}</span>
+                                    </div>
                                 </div>
                                 <button @click="openEdit('itinerary', element, index)" style="border:none; background:none; font-size:20px; opacity:0.3;">✏️</button>
                             </div>
-                            <div v-if="element.img" style="margin-top:12px;">
-                                <img :src="element.img" class="itinerary-img">
-                            </div>
                             <div style="padding-left:55px;">
                                 <div v-if="element.location" @click="openMap(element.location)" class="map-link">📍 {{ element.location }}</div>
-                                <div v-if="element.note" style="font-size:11px; color:var(--sub); margin-top:4px; opacity:0.8;">📝 {{ element.note }}</div>
+                                
+                                <div v-if="element.extraImgs && element.extraImgs.length > 0" class="img-container">
+                                    <img v-for="(img, imgIdx) in element.extraImgs" :key="imgIdx" :src="img" class="itinerary-img" @click.stop="viewImage(img)">
+                                </div>
+
+                                <div v-if="element.note" class="note-box">
+                                    📝 {{ element.note }}
+                                </div>
                             </div>
                         </div>
                     </div>
                 </template>
             </draggable>
             <button @click="openAdd('itinerary')" style="width:100%; padding:18px; border:2px dashed #cbd5e1; border-radius:20px; color:var(--sub); font-weight:bold; margin-top:10px;">+ 新增行程</button>
+        </div>
+    </div>
+
+    <div v-if="activeTab === 'route'">
+        <header class="header">
+            <h1>🗺️ 路線規劃</h1>
+            <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:5px; scrollbar-width:none;">
+                <div v-for="cat in ['景點','飲食','航班','住宿','交通','其他']" 
+                     :key="cat" 
+                     class="filter-tag" 
+                     :class="{active: routeFilters.includes(cat)}"
+                     @click="toggleRouteFilter(cat)">
+                    {{ cat }}
+                </div>
+            </div>
+        </header>
+
+        <div class="date-scroll">
+            <div v-for="(d, i) in dates" :key="i" @click="selectedDateIndex = i" class="date-item" :class="{active: selectedDateIndex === i}">
+                <span style="font-size:10px; font-weight:800; opacity:0.7;">{{ d.week }}</span>
+                <span style="font-size:20px; font-weight:900;">{{ d.day }}</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-top:0;">今日路線總覽 ({{ filteredRoutes.length }} 個地點)</h3>
+            <div v-if="filteredRoutes.length > 1" style="margin-bottom:15px;">
+                <button @click="openFullRoute" class="btn-action" style="background:var(--primary); color:white;">
+                    🚀 開啟今日總路線規劃 (Google Maps)
+                </button>
+            </div>
+            
+            <div v-if="filteredRoutes.length > 0">
+                <div v-for="(r, idx) in filteredRoutes" :key="idx" style="display:flex; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9;">
+                    <div style="width:24px; height:24px; background:var(--text); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; margin-right:12px;">{{ idx + 1 }}</div>
+                    <div style="flex:1;">
+                        <div style="font-weight:800; font-size:15px;">{{ r.name }}</div>
+                        <div style="font-size:11px; color:var(--sub);">{{ r.startH }}:{{ r.startM }} ‧ {{ r.location }}</div>
+                    </div>
+                    <button @click="openMap(r.location)" style="border:none; background:#f1f5f9; padding:8px; border-radius:10px; font-size:14px;">📍</button>
+                </div>
+            </div>
+            <div v-else style="text-align:center; padding:40px 0; color:var(--sub); font-weight:700;">
+                今日尚無符合篩選條件的地點
+            </div>
         </div>
     </div>
 
@@ -145,7 +226,7 @@
                         <div style="flex:1">
                             <div style="font-weight:900; font-size:16px;">{{ h.name }}</div>
                             <div style="font-size:12px; color:var(--primary); font-weight:700;">📅 {{ h.checkIn }} - {{ h.checkOut }}</div>
-                            <div v-if="h.address" class="map-link">📍 {{ h.address }}</div>
+                            <div v-if="h.address" @click="openMap(h.address)" class="map-link">📍 {{ h.address }}</div>
                             <div v-if="h.note" style="font-size:11px; color:var(--sub); margin-top:4px; opacity:0.8;">📝 {{ h.note }}</div>
                         </div>
                         <button @click="openEdit('hotel', h, hi)" style="border:none; background:none; font-size:20px; opacity:0.3;">✏️</button>
@@ -162,7 +243,7 @@
                         <div style="flex:1">
                             <div style="font-weight:900; font-size:16px;">{{ c.company }}</div>
                             <div style="font-size:12px; color:var(--primary); font-weight:700;">📅 {{ c.dateStart }} - {{ c.dateEnd }}</div>
-                            <div v-if="c.address" class="map-link">📍 {{ c.address }}</div>
+                            <div v-if="c.address" @click="openMap(c.address)" class="map-link">📍 {{ c.address }}</div>
                             <div v-if="c.note" style="font-size:11px; color:var(--sub); margin-top:4px; opacity:0.8;">📝 {{ c.note }}</div>
                         </div>
                         <button @click="openEdit('car', c, ci)" style="border:none; background:none; font-size:20px; opacity:0.3;">✏️</button>
@@ -220,7 +301,7 @@
     </div>
 
     <div v-if="activeTab === 'tools'">
-        <header class="header"><h1>匯率與工具</h1></header>
+        <header class="header"><h1>工具</h1></header>
         <div class="card" style="background:#1e293b; color:white;">
             <label style="color:rgba(255,255,255,0.5);">輸入台幣 TWD</label>
             <input v-model="twd" @input="calcT" type="number" style="font-size:40px; font-weight:900; color:white; margin-bottom:20px;">
@@ -232,6 +313,7 @@
             </div>
             <button @click="fetchRates" class="btn-action" style="background:var(--primary); color:white; margin-top:20px;">同步即時匯率</button>
         </div>
+
         <div class="card">
             <h3 style="margin-top:0;">常用匯率設定</h3>
             <div v-for="(v, k) in rates" :key="k" style="display:flex; justify-content:space-between; margin-bottom:12px; align-items:center;">
@@ -241,24 +323,21 @@
                     <button @click="delete rates[k]; if(curKey===k) curKey='JPY';" style="margin-left:10px; color:#ef4444; font-size:12px; border:none; background:none;">✕</button>
                 </div>
             </div>
-            <div style="margin-top:20px; padding-top:20px; border-top:2px dashed #f1f5f9;">
-                <div class="small-label">新增自定義幣別</div>
+            <div style="margin-top:25px; padding-top:20px; border-top:2px dashed #f1f5f9;">
+                <h3 style="margin-top:0;">🌍 天氣預報城市</h3>
                 <div style="display:flex; gap:10px; margin-top:8px;">
-                    <input v-model="newCurKey" placeholder="幣別(如HKD)" style="background:#f1f5f9; padding:10px; border-radius:10px; font-weight:800; width:100px; text-transform:uppercase;">
-                    <input v-model.number="newCurRate" type="number" step="0.0001" placeholder="匯率" style="background:#f1f5f9; padding:10px; border-radius:10px; flex:1;">
-                    <button @click="addCustomRate" style="background:var(--text); color:white; padding:10px 15px; border-radius:10px; font-weight:900; border:none;">新增</button>
+                    <input v-model="weatherCity" placeholder="輸入城市" style="background:#f1f5f9; padding:10px; border-radius:10px; font-weight:800; flex:1;">
+                    <button @click="fetchWeather" style="background:var(--text); color:white; padding:10px 15px; border-radius:10px; font-weight:900; border:none;">設定</button>
                 </div>
             </div>
-        </div>
-        <div class="card" style="background:#f1f5f9;">
-            <h3 style="margin-top:0;">🔗 資料分享與備份</h3>
-            <div class="small-label">匯出行程代碼 (複製文字傳給朋友)</div>
-            <textarea v-model="exportString" readonly @click="$event.target.select()" style="background:white; border-radius:12px; padding:10px; font-size:10px; height:60px; width:100%; box-sizing:border-box;" placeholder="點擊下方按鈕產生代碼"></textarea>
-            <button @click="generateExport" class="btn-action" style="background:var(--primary); color:white;">產生並複製匯出代碼</button>
-            <div style="margin-top:20px; border-top:1px solid #cbd5e1; padding-top:15px;">
-                <div class="small-label">匯入行程代碼 (貼上朋友傳給你的文字)</div>
-                <textarea v-model="importString" style="background:white; border-radius:12px; padding:10px; font-size:10px; height:60px; width:100%; box-sizing:border-box;" placeholder="在此貼上代碼..."></textarea>
-                <button @click="importData" class="btn-action" style="background:var(--text); color:white;">執行匯入行程</button>
+
+            <div style="margin-top:25px; padding-top:20px; border-top:2px dashed #f1f5f9;">
+                <h3 style="margin-top:0;">🔗 資料分享與備份</h3>
+                <button @click="generateExport" class="btn-action" style="background:var(--primary); color:white;">複製匯出代碼</button>
+                <div style="margin-top:15px;">
+                    <textarea v-model="importString" style="background:#f1f5f9; border-radius:12px; padding:10px; font-size:10px; height:60px; width:100%; box-sizing:border-box;" placeholder="在此貼上代碼..."></textarea>
+                    <button @click="importData" class="btn-action" style="background:var(--text); color:white;">執行匯入行程</button>
+                </div>
             </div>
         </div>
     </div>
@@ -267,18 +346,13 @@
         <div class="modal-content">
             <h2 style="margin-top:0; letter-spacing:-1px;">編輯項目</h2>
             <template v-if="modalType === 'itinerary'">
-                <label>行程圖片</label>
-                <div class="input-pill" @click="triggerItineraryFile" style="cursor:pointer; display:flex; align-items:center; justify-content:center; flex-direction:column; min-height:80px;">
-                    <img v-if="editData.img" :src="editData.img" style="width:100%; height:100px; object-fit:cover; border-radius:10px;">
-                    <span v-else style="font-size:24px; opacity:0.3;">📸 點擊上傳</span>
-                    <input type="file" id="itinerary-file-input" style="display:none" @change="uploadItineraryImg">
-                </div>
                 <label>行程類別</label>
                 <div class="input-pill"><select v-model="editData.type"><option v-for="c in ['景點','飲食','航班','住宿','交通','其他']" :value="c">{{c}}</option></select></div>
                 <label>行程名稱</label><div class="input-pill"><input v-model="editData.name"></div>
                 <label>地點</label><div class="input-pill"><input v-model="editData.location"></div>
                 <label>交通方式</label>
-                <div class="input-pill"><select v-model="editData.trans"><option v-for="t in ['地鐵','巴士','火車','飛機','步行','計程車']" :value="t">{{t}}</option></select></div>
+                <div class="input-pill"><select v-model="editData.trans"><option v-for="t in ['空白','地鐵','巴士','火車','飛機','步行','計程車']" :value="t">{{t}}</option></select></div>
+                
                 <div style="display:flex; gap:10px;">
                     <div style="flex:1;"><label>開始時間</label>
                         <div style="display:flex; gap:5px;"><div class="input-pill" style="flex:1; padding:10px;"><select v-model="editData.startH"><option v-for="h in 24" :value="String(h-1).padStart(2,'0')">{{String(h-1).padStart(2,'0')}}</option></select></div><div class="input-pill" style="flex:1; padding:10px;"><select v-model="editData.startM"><option v-for="m in 60" :value="String(m-1).padStart(2,'0')">{{String(m-1).padStart(2,'0')}}</option></select></div></div>
@@ -288,25 +362,31 @@
                     </div>
                 </div>
                 <label>備註</label><div class="input-pill"><textarea v-model="editData.note" rows="2"></textarea></div>
+                <label>行程圖片 (最多 3 張)</label>
+                <div style="display:flex; gap:10px; margin-bottom:12px;">
+                    <div v-for="(img, idx) in editData.extraImgs" :key="idx" style="position:relative; width:60px; height:60px;">
+                        <img :src="img" style="width:100%; height:100%; object-fit:cover; border-radius:10px;">
+                        <button @click="editData.extraImgs.splice(idx,1)" style="position:absolute; top:-5px; right:-5px; background:red; color:white; border:none; border-radius:50%; width:18px; height:18px; font-size:10px; cursor:pointer;">✕</button>
+                    </div>
+                    <div v-if="editData.extraImgs.length < 3" @click="triggerItineraryFile" style="width:60px; height:60px; border:2px dashed #cbd5e1; border-radius:10px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:20px; color:#cbd5e1;">＋</div>
+                    <input type="file" id="itinerary-file-input" style="display:none" accept="image/*" @change="uploadItineraryImg">
+                </div>
             </template>
             <template v-else-if="modalType === 'flight'">
                 <div style="display:flex; gap:8px;"><div style="flex:1;"><label>起飛</label><div class="input-pill"><input v-model="editData.dep"></div></div><div style="flex:1;"><label>時間</label><div class="input-pill"><input v-model="editData.depT" placeholder="08:00"></div></div></div>
                 <div style="display:flex; gap:8px;"><div style="flex:1;"><label>到達</label><div class="input-pill"><input v-model="editData.arr"></div></div><div style="flex:1;"><label>時間</label><div class="input-pill"><input v-model="editData.arrT" placeholder="12:00"></div></div></div>
                 <div style="display:flex; gap:8px;"><div style="flex:1;"><label>出發航站</label><div class="input-pill"><input v-model="editData.terminal"></div></div><div style="flex:1;"><label>到達航站</label><div class="input-pill"><input v-model="editData.arrTerminal"></div></div></div>
-                <label>班機號碼 / 飛行時間</label>
-                <div style="display:flex; gap:8px;"><div class="input-pill" style="flex:1;"><input v-model="editData.no" placeholder="BR198"></div><div class="input-pill" style="flex:1;"><input v-model="editData.dur" placeholder="3h 20m"></div></div>
+                <label>班機號碼</label><div class="input-pill"><input v-model="editData.no"></div>
             </template>
             <template v-else-if="modalType === 'hotel'">
                 <label>飯店名稱</label><div class="input-pill"><input v-model="editData.name"></div>
                 <div style="display:flex; gap:8px;"><div style="flex:1;"><label>入住</label><div class="input-pill"><input type="date" v-model="editData.checkIn"></div></div><div style="flex:1;"><label>退房</label><div class="input-pill"><input type="date" v-model="editData.checkOut"></div></div></div>
                 <label>地址</label><div class="input-pill"><input v-model="editData.address"></div>
-                <label>電話 / 備註</label><div class="input-pill"><input v-model="editData.phone" placeholder="電話"></div><div class="input-pill"><textarea v-model="editData.note" rows="2" placeholder="房型、代碼等"></textarea></div>
             </template>
             <template v-else-if="modalType === 'car'">
                 <label>租車公司</label><div class="input-pill"><input v-model="editData.company"></div>
                 <div style="display:flex; gap:8px;"><div style="flex:1;"><label>取車</label><div class="input-pill"><input type="date" v-model="editData.dateStart"></div></div><div style="flex:1;"><label>還車</label><div class="input-pill"><input type="date" v-model="editData.dateEnd"></div></div></div>
-                <label>取車地點</label><div class="input-pill"><input v-model="editData.address"></div>
-                <label>電話 / 備註</label><div class="input-pill"><input v-model="editData.phone"></div><div class="input-pill"><textarea v-model="editData.note" rows="2"></textarea></div>
+                <label>地點</label><div class="input-pill"><input v-model="editData.address"></div>
             </template>
             <div style="display:flex; gap:10px; margin-top:20px;">
                 <button v-if="editIdx !== -1" @click="handleDelete" style="flex:1; padding:18px; border:2px solid #ef4444; color:#ef4444; border-radius:18px; font-weight:900; background:none;">刪除</button>
@@ -317,8 +397,9 @@
 
     <nav class="dock">
         <div @click="activeTab='itinerary'" class="dock-item" :class="{active: activeTab==='itinerary'}"><div>🗓️</div>行程</div>
-        <div @click="activeTab='transport'" class="dock-item" :class="{active: activeTab==='transport'}"><div>✈️</div>交通住宿</div>
-        <div @click="activeTab='checklist'" class="dock-item" :class="{active: activeTab==='checklist'}"><div>🎒</div>行前準備</div>
+        <div @click="activeTab='route'" class="dock-item" :class="{active: activeTab==='route'}"><div>🗺️</div>路線</div>
+        <div @click="activeTab='transport'" class="dock-item" :class="{active: activeTab==='transport'}"><div>✈️</div>交宿</div>
+        <div @click="activeTab='checklist'" class="dock-item" :class="{active: activeTab==='checklist'}"><div>🎒</div>準備</div>
         <div @click="activeTab='shopping'" class="dock-item" :class="{active: activeTab==='shopping'}"><div>💳</div>購物</div>
         <div @click="activeTab='tools'" class="dock-item" :class="{active: activeTab==='tools'}"><div>🛠️</div>工具</div>
     </nav>
@@ -329,12 +410,14 @@ const { createApp, ref, computed, watch } = Vue;
 createApp({
     components: { 'draggable': window.vuedraggable },
     setup() {
-        const storageKey = 'travel_luxe_precision_v2';
-        const activeTab = ref('itinerary');
+        const storageKey = 'travel_luxe_precision_v2_route';
         const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
+        const todayStr = new Date().toISOString().split('T')[0]; 
+        
+        const activeTab = ref('itinerary');
         const tripName = ref(saved.tripName || '');
-        const tripDays = ref(saved.tripDays || 5);
-        const startDate = ref(saved.startDate || '2026-04-01');
+        const tripDays = ref(saved.tripDays || 1);
+        const startDate = ref(saved.startDate || todayStr);
         const selectedDateIndex = ref(0);
         const itineraryData = ref(saved.itinerary || Array.from({length:31}, () => []));
         const flightsList = ref(saved.flightsList || []);
@@ -342,53 +425,122 @@ createApp({
         const checklist = ref(saved.checklist || []);
         const todos = ref(saved.todos || []);
         const shopping = ref(saved.shopping || []);
-        const rates = ref(saved.rates || { JPY: 4.65, USD: 0.031, GBP: 0.024, EUR: 0.028 });
-        const exportString = ref(''); const importString = ref('');
+        const rates = ref(saved.rates || { JPY: 4.65, USD: 0.031, EUR: 0.028 });
+        const weatherCity = ref(saved.weatherCity || ''); 
+        const weatherList = ref(saved.weatherList || []); 
+        const routeFilters = ref(['景點','飲食','住宿','交通','其他','航班']);
+
+        const exportString = ref('');
+        const importString = ref('');
         const showModal = ref(false); const modalType = ref(''); const editData = ref({});
         const editIdx = ref(-1);
-        const twd = ref(100); const target = ref(0); const curKey = ref('JPY'); const newCheck = ref('');
-        const newTodo = ref('');
-        const newCurKey = ref(''); const newCurRate = ref(null);
+        const twd = ref(100); const target = ref(0); const curKey = ref('JPY'); 
+        const newCheck = ref(''); const newTodo = ref('');
 
-        const generateExport = () => {
-            const data = { tripName: tripName.value, tripDays: tripDays.value, startDate: startDate.value, itinerary: itineraryData.value, flightsList: flightsList.value, transport: transport.value, checklist: checklist.value, todos: todos.value, shopping: shopping.value, rates: rates.value };
-            exportString.value = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-            navigator.clipboard.writeText(exportString.value).then(() => alert('代碼已複製到剪貼簿！'));
+        const filteredRoutes = computed(() => {
+            const dayItems = itineraryData.value[selectedDateIndex.value] || [];
+            return dayItems.filter(item => item.location && routeFilters.value.includes(item.type));
+        });
+
+        const toggleRouteFilter = (cat) => {
+            const idx = routeFilters.value.indexOf(cat);
+            if(idx > -1) routeFilters.value.splice(idx, 1);
+            else routeFilters.value.push(cat);
         };
-        const importData = () => {
+
+        const openFullRoute = () => {
+            if(filteredRoutes.value.length < 1) return;
+            const locations = filteredRoutes.value.map(r => encodeURIComponent(r.location));
+            const origin = locations[0];
+            const destination = locations[locations.length - 1];
+            const waypoints = locations.slice(1, -1).join('|');
+            let url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}`;
+            if(waypoints) url += `&waypoints=${waypoints}`;
+            window.open(url, '_blank');
+        };
+
+        const openGoogleWeather = () => {
+            if(!weatherCity.value) return;
+            const url = `https://www.google.com/search?q=${encodeURIComponent(weatherCity.value + ' 天氣預報')}`;
+            window.open(url, '_blank');
+        };
+
+        const fetchWeather = async () => {
+            if(!weatherCity.value) return;
             try {
-                const decoded = JSON.parse(decodeURIComponent(escape(atob(importString.value))));
-                if(confirm('匯入將覆蓋目前所有資料，確定嗎？')){
-                    tripName.value = decoded.tripName;
-                    tripDays.value = decoded.tripDays; startDate.value = decoded.startDate;
-                    itineraryData.value = decoded.itinerary; flightsList.value = decoded.flightsList;
-                    transport.value = decoded.transport; checklist.value = decoded.checklist;
-                    todos.value = decoded.todos || [];
-                    shopping.value = decoded.shopping; rates.value = decoded.rates;
-                    alert('匯入成功！');
-                }
-            } catch(e) { alert('無效的代碼，請重新檢查。'); }
+                const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(weatherCity.value)}&count=1&language=zh&format=json`);
+                const geoData = await geoRes.json();
+                if(!geoData.results) return;
+                const { latitude: lat, longitude: lon } = geoData.results[0];
+                const weaRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`);
+                const weaData = await weaRes.json();
+                const codeToIcon = (c) => {
+                    if (c <= 3) return '☀️'; if (c <= 48) return '☁️'; if (c <= 67) return '🌧️'; if (c <= 77) return '❄️'; return '⛈️'; 
+                };
+                weatherList.value = weaData.daily.time.map((t, idx) => ({
+                    fullDate: t, tempMax: Math.round(weaData.daily.temperature_2m_max[idx]), tempMin: Math.round(weaData.daily.temperature_2m_min[idx]), icon: codeToIcon(weaData.daily.weathercode[idx])
+                }));
+            } catch(e) {}
         };
+
+        const currentWeather = computed(() => {
+            if (!weatherList.value.length) return {};
+            const selDateObj = new Date(startDate.value);
+            selDateObj.setDate(selDateObj.getDate() + selectedDateIndex.value);
+            const selDateStr = selDateObj.toISOString().split('T')[0];
+            return weatherList.value.find(w => w.fullDate === selDateStr) || weatherList.value[0] || {};
+        });
+
+        const viewImage = (url) => { window.open(url, '_blank'); };
 
         const openAdd = (type) => { 
-            modalType.value = type;
-            editIdx.value = -1; 
-            if(type==='itinerary') editData.value = { type:'景點', name:'', location:'', trans:'步行', startH:'08', startM:'00', endH:'10', endM:'00', note:'', img:null };
+            modalType.value = type; editIdx.value = -1; 
+            if(type==='itinerary') editData.value = { type:'景點', name:'', location:'', trans:'空白', startH:'08', startM:'00', endH:'10', endM:'00', note:'', extraImgs:[] };
             else if(type==='flight') editData.value = { dep:'', arr:'', no:'', depT:'', arrT:'', terminal:'', arrTerminal:'', dur:'' };
             else if(type==='hotel') editData.value = { name:'', address:'', checkIn:'', checkOut:'', phone:'', note:'' };
             else if(type==='car') editData.value = { company:'', address:'', dateStart:'', dateEnd:'', phone:'', note:'' };
             showModal.value = true; 
         };
-        const openEdit = (type, item, idx) => { modalType.value = type; editData.value = {...item}; editIdx.value = idx; showModal.value = true; };
+        const openEdit = (type, item, idx) => { 
+            modalType.value = type; 
+            let data = {...item};
+            if(!data.extraImgs) data.extraImgs = [];
+            editData.value = data; 
+            editIdx.value = idx; 
+            showModal.value = true; 
+        };
+
+        const triggerItineraryFile = () => document.getElementById('itinerary-file-input').click();
+        const uploadItineraryImg = (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (r) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const maxW = 800;
+                    const scale = Math.min(maxW / img.width, 1);
+                    canvas.width = img.width * scale; canvas.height = img.height * scale;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    editData.value.extraImgs.push(canvas.toDataURL('image/jpeg', 0.7));
+                };
+                img.src = r.target.result;
+            };
+            reader.readAsDataURL(file);
+            e.target.value = '';
+        };
+
         const saveItem = () => {
-            const d = {...editData.value};
-            const i = editIdx.value;
+            const d = {...editData.value}; const i = editIdx.value;
             if(modalType.value==='itinerary'){ i===-1 ? itineraryData.value[selectedDateIndex.value].push(d) : itineraryData.value[selectedDateIndex.value][i] = d; autoSort(); }
             else if(modalType.value==='flight') i===-1 ? flightsList.value.push(d) : flightsList.value[i] = d;
             else if(modalType.value==='hotel') i===-1 ? transport.value.hotels.push(d) : transport.value.hotels[i] = d;
             else if(modalType.value==='car') i===-1 ? transport.value.cars.push(d) : transport.value.cars[i] = d;
             showModal.value = false;
         };
+
         const handleDelete = () => {
             if(modalType.value==='itinerary') itineraryData.value[selectedDateIndex.value].splice(editIdx.value,1);
             else if(modalType.value==='flight') flightsList.value.splice(editIdx.value,1);
@@ -396,37 +548,49 @@ createApp({
             else if(modalType.value==='car') transport.value.cars.splice(editIdx.value,1);
             showModal.value = false;
         };
+
         const autoSort = () => { itineraryData.value[selectedDateIndex.value].sort((a,b) => (parseInt(a.startH)*60+parseInt(a.startM)) - (parseInt(b.startH)*60+parseInt(b.startM))); };
         const calcGap = (prev, curr) => {
             const p = parseInt(prev.endH || 0)*60 + parseInt(prev.endM || 0);
             const c = parseInt(curr.startH || 0)*60 + parseInt(curr.startM || 0);
-            const diff = c - p;
-            if(diff <= 0) return null;
+            const diff = c - p; if(diff <= 0) return null;
             const h = Math.floor(diff/60); const m = diff%60; return h > 0 ? `${h}h${m}m` : `${m}m`;
         };
         const calcT = () => target.value = (twd.value * (rates.value[curKey.value] || 0)).toFixed(2);
         const calcTwd = () => twd.value = (target.value / (rates.value[curKey.value] || 1)).toFixed(0);
-        const fetchRates = async () => { try { const res=await fetch('https://open.er-api.com/v6/latest/TWD'); const data=await res.json(); Object.keys(rates.value).forEach(k=>{ if(data.rates[k]) rates.value[k]=parseFloat(data.rates[k].toFixed(4)); }); calcT(); } catch(e){ alert("同步失敗"); } };
-        const addCustomRate = () => { if(newCurKey.value && newCurRate.value) { rates.value[newCurKey.value.toUpperCase()] = newCurRate.value; newCurKey.value = ''; newCurRate.value = null; } };
+        const fetchRates = async () => { try { const res=await fetch('https://open.er-api.com/v6/latest/TWD'); const data=await res.json(); Object.keys(rates.value).forEach(k=>{ if(data.rates[k]) rates.value[k]=parseFloat(data.rates[k].toFixed(4)); }); calcT(); } catch(e){} };
         const addCheck = () => { if(newCheck.value.trim()){ checklist.value.push({name:newCheck.value, done:false}); newCheck.value=''; } };
         const addTodo = () => { if(newTodo.value.trim()){ todos.value.push({name:newTodo.value, done:false}); newTodo.value=''; } };
         const triggerFile = (i) => document.getElementById('file-'+i).click();
         const uploadImg = (e, i) => { const reader=new FileReader(); reader.onload=(r)=>shopping.value[i].img=r.target.result; reader.readAsDataURL(e.target.files[0]); };
-        
-        const triggerItineraryFile = () => document.getElementById('itinerary-file-input').click();
-        const uploadItineraryImg = (e) => { const reader=new FileReader(); reader.onload=(r)=>editData.value.img=r.target.result; reader.readAsDataURL(e.target.files[0]); };
-
         const dates = computed(() => { const res=[]; const start=new Date(startDate.value); for(let i=0; i<tripDays.value; i++){ const t=new Date(start); t.setDate(start.getDate()+i); res.push({ day: `${t.getMonth()+1}/${t.getDate()}`, week: ["SUN","MON","TUE","WED","THU","FRI","SAT"][t.getDay()] }); } return res; });
-        const openMap = (l) => window.open(`https://www.google.com/maps/search/${encodeURIComponent(l)}`, '_blank');
-        const getIcon = (t) => ({ '景點':'📷','飲食':'🍴','航班':'✈️','住宿':'🏠','交通':'🚕','其他':'⚙️' }[t] || '✨');
+        const openMap = (l) => { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l)}`, '_blank'); };
+        const getIcon = (t) => ({ '景點':'📷','飲食':'🍴','航班':'✈️','住宿':'🏠','交通':'🚌','其他':'⚙️' }[t] || '✨');
         const getTransIcon = (t) => ({ '地鐵':'🚇','巴士':'🚌','火車':'🚄','飛機':'✈️','步行':'🚶','計程車':'🚕' }[t] || '🚶');
         
-        watch([tripName, tripDays, startDate, itineraryData, flightsList, transport, checklist, todos, shopping, rates], () => {
-            localStorage.setItem(storageKey, JSON.stringify({ tripName: tripName.value, tripDays: tripDays.value, startDate: startDate.value, itinerary: itineraryData.value, flightsList: flightsList.value, transport: transport.value, checklist: checklist.value, todos: todos.value, shopping: shopping.value, rates: rates.value }));
+        watch([tripName, tripDays, startDate, itineraryData, flightsList, transport, checklist, todos, shopping, rates, weatherCity, weatherList], () => {
+            localStorage.setItem(storageKey, JSON.stringify({ tripName: tripName.value, tripDays: tripDays.value, startDate: startDate.value, itinerary: itineraryData.value, flightsList: flightsList.value, transport: transport.value, checklist: checklist.value, todos: todos.value, shopping: shopping.value, rates: rates.value, weatherCity: weatherCity.value, weatherList: weatherList.value }));
         }, { deep: true });
 
+        const generateExport = () => {
+            const data = { tripName: tripName.value, tripDays: tripDays.value, startDate: startDate.value, itinerary: itineraryData.value, flightsList: flightsList.value, transport: transport.value, checklist: checklist.value, todos: todos.value, shopping: shopping.value, rates: rates.value, weatherCity: weatherCity.value };
+            const str = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
+            navigator.clipboard.writeText(str).then(() => alert('代碼已複製！'));
+        };
+        const importData = () => {
+            try {
+                const decoded = JSON.parse(decodeURIComponent(escape(atob(importString.value))));
+                if(confirm('確定匯入並覆蓋嗎？')){
+                    tripName.value = decoded.tripName; tripDays.value = decoded.tripDays; startDate.value = decoded.startDate; itineraryData.value = decoded.itinerary; flightsList.value = decoded.flightsList; transport.value = decoded.transport; checklist.value = decoded.checklist; todos.value = decoded.todos || []; shopping.value = decoded.shopping; rates.value = decoded.rates; weatherCity.value = decoded.weatherCity || ''; fetchWeather();
+                    alert('匯入成功！');
+                }
+            } catch(e) { alert('無效代碼。'); }
+        };
+
+        if(weatherCity.value) fetchWeather();
         calcT();
-        return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, newCurKey, newCurRate, addCustomRate, newCheck, addCheck, newTodo, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, importData, exportString, importString };
+
+        return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, addCheck, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, importData, exportString, importString, weatherCity, weatherList, fetchWeather, currentWeather, openGoogleWeather, viewImage, routeFilters, filteredRoutes, toggleRouteFilter, openFullRoute };
     }
 }).mount('#app');
 </script>
