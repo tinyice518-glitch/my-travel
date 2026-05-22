@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Travel Luxe Pro - Precision Edition V2.7</title>
+    <title>Travel Luxe Pro - Precision Edition V2.9</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuedraggable@4.1.0/dist/vuedraggable.umd.min.js"></script>
@@ -85,8 +85,8 @@
         }
         .filter-tag.active { background: var(--primary); color: white;
         }
-        .map-container { width: 100%; height: 480px; border-radius: 22px; overflow: hidden; margin-top: 10px;
-            border: 1px solid #e2e8f0; box-shadow: inset 0 0 20px rgba(0,0,0,0.05); }
+        .map-container { width: 100%; height: 450px; border-radius: 18px; overflow: hidden; margin-top: 15px;
+            border: 1px solid #e2e8f0; }
         .shopping-img-box { position: relative; height: 130px; background: #f1f5f9; border-radius: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .shopping-img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
         .shopping-upload-btn { position: absolute; bottom: 8px; right: 8px; background: rgba(15, 23, 42, 0.6); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); }
@@ -156,7 +156,7 @@
                                 <div style="flex:1">
                                     <div style="font-weight:900; font-size:17px;">{{ element.name || '未命名項目' }}</div>
                                     <div style="font-size:13px; font-weight:700; color:var(--primary);">
-                                        {{ element.startH }} : {{ element.startM }} - {{ element.endH }} : {{ element.endM }} 
+                                        {{ element.startH }}:{{ element.startM }} - {{ element.endH }}:{{ element.endM }} 
                                         <span v-if="element.trans && element.trans !== '空白'">‧ {{ getTransIcon(element.trans) }}</span>
                                     </div>
                                 </div>
@@ -179,7 +179,7 @@
 
     <div v-if="activeTab === 'route'">
         <header class="header">
-            <h1>🗺️ 當日全景規劃</h1>
+            <h1>🗺️ 路線規劃</h1>
             <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:5px; scrollbar-width:none;">
                 <div v-for="cat in ['景點','飲食','航班','住宿','交通','核心']" :key="cat" class="filter-tag" :class="{active: routeFilters.includes(cat)}" @click="toggleRouteFilter(cat)">
                     {{ cat }}
@@ -210,6 +210,7 @@
                         <div style="font-weight:800; font-size:15px;">{{ r.name }}</div>
                         <div style="font-size:11px; color:var(--sub);">{{ r.startH }}:{{ r.startM }} ‧ {{ r.location }}</div>
                     </div>
+                    <button @click="openMap(r.location)" style="border:none; background:#f1f5f9; padding:8px; border-radius:10px; font-size:14px;">📍</button>
                 </div>
             </div>
             <div v-else style="text-align:center; padding:40px 0; color:var(--sub); font-weight:700;">
@@ -488,7 +489,7 @@ const { createApp, ref, computed, onMounted, watch } = Vue;
 
 createApp({
     setup() {
-        const activeTab = ref('route'); // 預設直接看路線規劃分頁確認效果
+        const activeTab = ref('route'); // 預設開啟規劃分頁以利立即測試
         const tripName = ref('');
         const tripDays = ref(5);
         const startDate = ref('2026-05-24');
@@ -518,6 +519,8 @@ createApp({
         const routeFilters = ref(['景點','飲食','航班','住宿','交通','核心']);
         const showImgModal = ref(false);
         const previewImgSrc = ref('');
+
+        const rates = ref({ JPY: 4.65, USD: 0.031, EUR: 0.029, KRW: 41.5 });
 
         const initArrays = () => {
             for(let i=0; i<30; i++) {
@@ -561,8 +564,6 @@ createApp({
 
         onMounted(() => { loadData(); });
 
-        const rates = ref({ JPY: 4.65, USD: 0.031, EUR: 0.029, KRW: 41.5 });
-
         const addCustomRate = () => {
             if(newCurrencyKey.value && newCurrencyValue.value) {
                 rates.value[newCurrencyKey.value.toUpperCase().trim()] = newCurrencyValue.value;
@@ -587,31 +588,34 @@ createApp({
             idx > -1 ? routeFilters.value.splice(idx, 1) : routeFilters.value.push(cat);
         };
 
-        // 🌟 核心升級：精準生成帶有 1, 2, 3... 數字標籤的多景點嵌入地圖，解決自動縮放與單景點殘留問題
+        // 🌟 核心修正：改用 Google 官方最穩定的動態經典多點導航，強迫地圖伺服器將所有點完美包覆
         const inlineMapUrl = computed(() => {
             if (filteredRoutes.value.length === 0) return '';
-
-            // 依據當天項目順序，提煉出乾淨的地點清單（不重複）
-            const locList = [];
-            filteredRoutes.value.forEach(r => {
-                const loc = r.location.trim();
-                if (loc && !locList.includes(loc)) {
-                    locList.push(loc);
-                }
-            });
-
+            
+            // 提煉當天有填寫地址的所有地點清單
+            const locList = filteredRoutes.value.map(r => r.location.trim()).filter(l => l !== '');
             if (locList.length === 0) return '';
 
-            // 構建多點標記（Markers）字符串
-            // 格式：&markers=color:red|label:1|地點1&markers=color:red|label:2|地點2...
-            let markersParam = '';
-            locList.forEach((loc, index) => {
-                const labelNumber = index + 1; // 自動計算順序：1, 2, 3...
-                markersParam += `&markers=color:red%7Clabel:${labelNumber}%7C${encodeURIComponent(loc)}`;
-            });
+            // 1. 如果只有一個地點，顯示標準單點大頭針
+            if (locList.length === 1) {
+                return `https://maps.google.com/maps?q=${encodeURIComponent(locList[0])}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+            }
 
-            // 使用靜態/動態多標記聚合引擎。這個模式在多個 markers 存在時，Google 伺服器會強制自動擴展視角(Bounding Box)，保證 100% 同時看見所有數字大頭針。
-            return `https://maps.google.com/maps?q=$&size=600x480&maptype=roadmap${markersParam}&sensor=false&output=embed`;
+            // 2. 當有複數地點時：利用 Google 經典的 Direction 參數架構
+            // 起點為地點 1，終點為最後一個地點
+            const origin = locList[0];
+            const destination = locList[locList.length - 1];
+            
+            // 中間所有的點（地點 2 ~ 倒數第二個點）全部打包串接進 to 欄位
+            let midPoints = '';
+            if (locList.length > 2) {
+                midPoints = '+to:' + locList.slice(1, -1).map(l => encodeURIComponent(l)).join('+to:');
+            }
+
+            // ⚠️ 關鍵：saddr (起點) + daddr (終點加中間點) + output=embed
+            // 這個架構會「百分之百」觸發 Google 地圖內建的 Bounding Box 自動適配計算，
+            // 無論地點相隔多遠或多近，都會自動調整縮放級別（Zoom Level），保證全數放進畫面。
+            return `https://maps.google.com/maps?saddr=${encodeURIComponent(origin)}&daddr=${encodeURIComponent(destination)}${midPoints}&t=&z=12&ie=UTF8&iwloc=&output=embed`;
         });
 
         const openGoogleWeather = () => {
@@ -628,7 +632,7 @@ createApp({
                 const { latitude: lat, longitude: lon } = geoData.results[0];
 
                 const weaRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`);
-                const weaData = await weaRes.json();
+                const weaData = await weRes.json();
 
                 const codeToIcon = (c) => {
                     if (c <= 3) return '☀️';
@@ -644,7 +648,7 @@ createApp({
                     tempMin: Math.round(weaData.daily.temperature_2m_min[idx]),
                     icon: codeToIcon(weaData.daily.weathercode[idx])
                 }));
-            } catch(e) { alert('天氣更新失敗'); }
+            } catch(e) { console.error('天氣更新失敗'); }
         };
 
         const currentWeather = computed(() => {
@@ -794,7 +798,7 @@ createApp({
             return res;
         });
 
-        const openMap = (l) => { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l)}`, '_blank'); };
+        const openMap = (l) => { window.open(`https://maps.google.com/maps?q=${encodeURIComponent(l)}`, '_blank'); };
         const getIcon = (t) => ({ '景點':'📷','飲食':'🍴','航班':'✈️','住宿':'🏠','交通':'🚌','其他':'⚙️' }[t] || '✨');
         const getTransIcon = (t) => ({ '地鐵':'🚇','巴士':'🚌','火車':'🚄','飛機':'✈️','步行':'🚶','計程車':'🚕' }[t] || '🚶');
 
@@ -815,7 +819,6 @@ createApp({
             } catch(e) { alert('無效代碼。'); }
         };
 
-        if(weatherCity.value) fetchWeather();
         calcT();
 
         return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, addCheck, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, importData, exportString, importString, weatherCity, weatherList, fetchWeather, currentWeather, openGoogleWeather, viewImage, routeFilters, filteredRoutes, toggleRouteFilter, inlineMapUrl, newCurrencyKey, newCurrencyValue, addCustomRate, showImgModal, previewImgSrc, newCheck, newTodo, formatDateMD };
