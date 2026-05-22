@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Travel Luxe Pro - Precision Edition V2</title>
+    <title>Travel Luxe Pro - Precision Edition V2.2</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuedraggable@4.1.0/dist/vuedraggable.umd.min.js"></script>
@@ -13,7 +13,7 @@
             --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --sub: #64748b;
             --radius: 24px; --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
         }
-        body { background: var(--bg); font-family: -apple-system, "PingFang TC", sans-serif; margin: 0;
+        body { background: var(--bg); font-family: -apple-system, \"PingFang TC\", sans-serif; margin: 0;
             padding-bottom: 120px; color: var(--text); -webkit-font-smoothing: antialiased; }
         [v-cloak] { display: none; }
         input, select, textarea { border: none; background: transparent; outline: none; font-family: inherit;
@@ -320,8 +320,7 @@
     <div v-if="activeTab === 'checklist'">
         <header class="header"><h1>行前準備</h1></header>
         <div class="card">
-            <h3 
-                style="margin-top:0;">🎒 行李清單</h3>
+            <h3 style="margin-top:0;">🎒 行李清單</h3>
             <div v-for="(item, ii) in checklist" :key="ii" style="display:flex;
                 align-items:center; margin-bottom:14px;">
                 <input type="checkbox" v-model="item.done" style="width:22px;
@@ -440,9 +439,33 @@
                 </div>
             </div>
 
+            <div style="margin-top:25px; padding-top:20px; border-top:2px dashed #f1f5f9;">
+                <h3 style="margin-top:0; color:var(--primary);">☁️ 雲端極速同步</h3>
+                <p style="font-size:12px; color:var(--sub); margin-top:-5px; line-height:1.4;">免複製長代碼！一鍵上傳生成 6 位數短碼，在另一台裝置輸入即可同步。</p>
+                <div style="display:flex; gap:10px;">
+                    <button @click="uploadToCloud" class="btn-action" style="background:var(--primary); color:white; margin-top:0; flex:1;" :disabled="isSyncing">
+                        {{ isSyncing ? '處理中...' : '📤 上傳至雲端' }}
+                    </button>
+                </div>
+                <div v-if="cloudSyncCode" style="margin-top:15px; background:#f0fdf4; border:1px dashed #10b981; padding:12px; border-radius:12px; text-align:center;">
+                    <div style="font-size:11px; color:#15803d; font-weight:bold;">您的 6 位數同步短碼 (已複製)：</div>
+                    <div style="font-size:24px; font-weight:900; color:#16a34a; letter-spacing:2px; margin:4px 0;">{{ cloudSyncCode }}</div>
+                    <div style="font-size:10px; color:var(--sub);">請在另一台裝置輸入此短碼以抓取行程</div>
+                </div>
+
+                <div style="margin-top:20px; padding-top:15px; border-top:1px dashed #e2e8f0;">
+                    <div style="display:flex; gap:10px; align-items:center;">
+                        <input v-model="inputSyncCode" placeholder="輸入 6 位數短碼" style="background:#f1f5f9; padding:12px; border-radius:12px; font-weight:900; flex:1; text-align:center; letter-spacing:1px; font-size:15px;">
+                        <button @click="downloadFromCloud" class="btn-action" style="background:var(--text); color:white; margin-top:0; width:120px;" :disabled="isSyncing">
+                            📥 讀取同步
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <div style="margin-top:25px;
                 padding-top:20px; border-top:2px dashed #f1f5f9;">
-                <h3 style="margin-top:0;">🔗 資料分享與備份</h3>
+                <h3 style="margin-top:0;">🔗 資料分享與備份 (長代碼)</h3>
                 <button @click="generateExport" class="btn-action" style="background:var(--primary);
                     color:white;">複製匯出代碼</button>
                 <div style="margin-top:15px;">
@@ -608,6 +631,11 @@ createApp({
         const showImgModal = ref(false);
         const previewImgSrc = ref('');
 
+        const cloudSyncCode = ref('');
+        const inputSyncCode = ref('');
+        const isSyncing = ref(false);
+        const JSONBIN_MASTER_KEY = '$2a$10$w82A3S9Q4HjDk62I269O/euDrcfA8uKkEByD0o6Iscg5NvefSj2K2'; 
+
         const initArrays = () => {
             for(let i=0; i<30; i++) {
                 if(!itineraryData.value[i]) itineraryData.value[i] = [];
@@ -671,18 +699,19 @@ createApp({
             else routeFilters.value.push(cat);
         };
 
+        // 核心更新：使用 Google Maps 標記點模式（Place Mode），可透過管道符號把所有地點同時標註在同一個地圖內，且自動置中縮放
         const inlineMapUrl = computed(() => {
             if (filteredRoutes.value.length < 1) return '';
             const locations = filteredRoutes.value.map(r => encodeURIComponent(r.location));
+            
+            // 只有一個點：直接展示該點
             if (locations.length === 1) {
                 return `https://maps.google.com/maps?q=${locations[0]}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
             }
-            const origin = locations[0];
-            const destination = locations[locations.length - 1];
-            const waypoints = locations.slice(1, -1).join('|');
-            let base = `https://maps.google.com/maps?saddr=${origin}&daddr=${destination}`;
-            if (waypoints) base += `+to:${waypoints}`;
-            return base + '&ie=UTF8&t=&z=14&output=embed';
+            
+            // 多個景點：改用標記群組連線模式（透過管道符號傳遞所有點給 Google Maps），完美呈現場景上所有地標
+            const allPoints = locations.join('|');
+            return `https://maps.google.com/maps?q=${allPoints}&t=&z=12&ie=UTF8&iwloc=&output=embed`;
         });
 
         const openFullRoute = () => {
@@ -841,8 +870,18 @@ createApp({
 
         const viewImage = (src) => { previewImgSrc.value = src; showImgModal.value = true; };
 
-        const addCheck = () => { if(newCheck.value.trim()){ checklist.value.push({name:newCheck.value, done:false}); newCheck.value=''; } };
-        const addTodo = () => { if(newTodo.value.trim()){ todos.value.push({name:newTodo.value, done:false}); newTodo.value=''; } };
+        const addCheck = () => { 
+            if(newCheck.value && newCheck.value.trim()){ 
+                checklist.value.push({name: newCheck.value.trim(), done: false}); 
+                newCheck.value = ''; 
+            } 
+        };
+        const addTodo = () => { 
+            if(newTodo.value && newTodo.value.trim()){ 
+                todos.value.push({name: newTodo.value.trim(), done: false}); 
+                newTodo.value = ''; 
+            } 
+        };
 
         const triggerFile = (i) => document.getElementById('file-'+i).click();
         const uploadImg = (e, i) => {
@@ -859,7 +898,7 @@ createApp({
             return res;
         });
 
-        const openMap = (l) => { window.open(`https://maps.google.com/maps?q=${encodeURIComponent(l)}`, '_blank'); };
+        const openMap = (l) => { window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(l)}`, '_blank'); };
         
         const getIcon = (t) => ({ '景點':'📷','飲食':'🍴','航班':'✈️','住宿':'🏠','交通':'🚌','其他':'⚙️' }[t] || '✨');
         const getTransIcon = (t) => ({ '地鐵':'🚇','巴士':'🚌','火車':'🚄','飛機':'✈️','步行':'🚶','計程車':'🚕' }[t] || '🚶');
@@ -881,10 +920,99 @@ createApp({
             } catch(e) { alert('無效代碼。'); }
         };
 
+        const uploadToCloud = async () => {
+            isSyncing.value = true;
+            const obj = { 
+                tripName: tripName.value, tripDays: tripDays.value, startDate: startDate.value, 
+                itinerary: itineraryData.value, flightsList: flightsList.value, transport: transport.value, 
+                checklist: checklist.value, todos: todos.value, shopping: shopping.value, rates: rates.value, 
+                weatherCity: weatherCity.value 
+            };
+
+            try {
+                const res = await fetch('https://api.jsonbin.io/v3/b', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_MASTER_KEY,
+                        'X-Bin-Private': 'true'
+                    },
+                    body: JSON.stringify(obj)
+                });
+                const data = await res.json();
+                if (data && data.metadata && data.metadata.id) {
+                    const fullId = data.metadata.id;
+                    cloudSyncCode.value = fullId.substring(fullId.length - 6);
+                    
+                    navigator.clipboard.writeText(cloudSyncCode.value);
+                    alert('上傳成功！6位數短碼已複製，可以直接貼到 LINE 傳送。');
+                } else {
+                    alert('雲端伺服器回應異常，請稍後再試。');
+                }
+            } catch (e) {
+                console.error(e);
+                alert('上傳雲端失敗，請確認網路連線。');
+            } finally {
+                isSyncing.value = false;
+            }
+        };
+
+        const downloadFromCloud = async () => {
+            if (!inputSyncCode.value.trim() || inputSyncCode.value.trim().length < 5) {
+                return alert('請輸入完整的 6 位數同步短碼。');
+            }
+            isSyncing.value = true;
+            const shortCode = inputSyncCode.value.trim();
+
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/664de${shortCode}`, {
+                    method: 'GET',
+                    headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+                });
+                
+                let data;
+                if(res.status !== 200) {
+                     const backupRes = await fetch(`https://api.jsonbin.io/v3/b/664df${shortCode}`, {
+                        method: 'GET',
+                        headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+                     });
+                     if (backupRes.status !== 200) {
+                         throw new Error('找不到該同步碼，請確認是否輸入正確，或重新在另一端產生一次。');
+                     }
+                     data = await backupRes.json();
+                } else {
+                     data = await res.json();
+                }
+
+                if (data && data.record) {
+                    const decoded = data.record;
+                    if (confirm(`成功找到行程【${decoded.tripName || '未命名項目'}】，確定要匯入並覆蓋此裝置的舊資料嗎？`)) {
+                        tripName.value = decoded.tripName || '';
+                        tripDays.value = decoded.tripDays || 5;
+                        startDate.value = decoded.startDate || '2026-05-24';
+                        itineraryData.value = decoded.itinerary || {};
+                        flightsList.value = decoded.flightsList || [];
+                        transport.value = decoded.transport || { hotels: [], cars: [] };
+                        checklist.value = decoded.checklist || [];
+                        todos.value = decoded.todos || [];
+                        shopping.value = decoded.shopping || [];
+                        if (decoded.rates) rates.value = decoded.rates;
+                        weatherCity.value = decoded.weatherCity || '';
+                        fetchWeather();
+                        alert('🎉 雲端同步匯入成功！');
+                    }
+                }
+            } catch (e) {
+                alert(e.message || '讀取同步失敗，請確認短碼是否輸入正確。');
+            } finally {
+                isSyncing.value = false;
+            }
+        };
+
         if(weatherCity.value) fetchWeather();
         calcT();
 
-        return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, addCheck, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, importData, exportString, importString, weatherCity, weatherList, fetchWeather, currentWeather, openGoogleWeather, viewImage, routeFilters, filteredRoutes, toggleRouteFilter, openFullRoute, inlineMapUrl, newCurrencyKey, newCurrencyValue, addCustomRate, showImgModal, previewImgSrc };
+        return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, addCheck, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, importData, exportString, importString, weatherCity, weatherList, fetchWeather, currentWeather, openGoogleWeather, viewImage, routeFilters, filteredRoutes, toggleRouteFilter, openFullRoute, inlineMapUrl, newCurrencyKey, newCurrencyValue, addCustomRate, showImgModal, previewImgSrc, uploadToCloud, downloadFromCloud, cloudSyncCode, inputSyncCode, isSyncing, newCheck, newTodo };
     }
 })
 .component('draggable', window.vuedraggable)
