@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Travel Luxe Pro - Precision Edition V2.2</title>
+    <title>Travel Luxe Pro - Precision Edition V2.5</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuedraggable@4.1.0/dist/vuedraggable.umd.min.js"></script>
@@ -23,6 +23,7 @@
         .card { background: var(--card);
             margin: 15px; padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.02);
         }
+        .card.route-card { padding: 15px 12px; }
         .date-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 20px; scrollbar-width: none;
         }
         .date-item { min-width: 65px; height: 85px; background: white; border-radius: 20px; display: flex;
@@ -42,6 +43,12 @@
             padding: 20px; margin-bottom: 15px; display: flex; align-items: center; }
         .small-label { font-size: 11px;
             color: var(--sub); font-weight: bold; margin-bottom: 2px; }
+        .flight-date-label { font-size: 11px; font-weight: 800; color: var(--primary); margin-bottom: 4px; }
+        /* 飛機航線箭頭樣式 */
+        .flight-line-container { display: flex; align-items: center; justify-content: center; position: relative; height: 16px; margin: 4px 10px; }
+        .flight-arrow-line { width: 100%; height: 2px; background: #cbd5e1; position: relative; }
+        .flight-arrow-line::after { content: ''; position: absolute; right: -2px; top: -4px; width: 0; height: 0; border-top: 5px solid transparent; border-bottom: 5px solid transparent; border-left: 7px solid #cbd5e1; }
+        
         .dock { position: fixed; bottom: 25px;
             left: 50%; transform: translateX(-50%); width: 95%; max-width: 500px; height: 75px; background: #0f172a; border-radius: 35px; display: flex; align-items: center; justify-content: space-around;
             z-index: 1000; box-shadow: 0 20px 40px rgba(0,0,0,0.3); }
@@ -79,8 +86,11 @@
         }
         .filter-tag.active { background: var(--primary); color: white;
         }
-        .map-container { width: 100%; height: 300px; border-radius: 18px; overflow: hidden; margin-top: 15px;
+        .map-container { width: 100%; height: 450px; border-radius: 18px; overflow: hidden; margin-top: 15px;
             border: 1px solid #e2e8f0; }
+        .shopping-img-box { position: relative; height: 130px; background: #f1f5f9; border-radius: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .shopping-img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
+        .shopping-upload-btn { position: absolute; bottom: 8px; right: 8px; background: rgba(15, 23, 42, 0.6); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); }
     </style>
 </head>
 <body>
@@ -201,22 +211,22 @@
             </div>
         </div>
 
-        <div class="card">
-            <h3 style="margin-top:0;">今日路線總覽 ({{ filteredRoutes.length }} 個地點)</h3>
+        <div class="card route-card">
+            <h3 style="margin-top:0; padding-left: 4px;">今日路線總覽 ({{ filteredRoutes.length }} 個地點)</h3>
             
             <div v-if="filteredRoutes.length > 0" class="map-container">
                 <iframe width="100%" height="100%" frameborder="0" style="border:0" :src="inlineMapUrl" allowfullscreen></iframe>
             </div>
 
             <div v-if="filteredRoutes.length > 1" style="margin-bottom:15px;
-                margin-top:15px;">
+                margin-top:15px; padding: 0 4px;">
                 <button @click="openFullRoute" class="btn-action" style="background:var(--primary);
                     color:white;">
                     🚀 開啟今日總路線規劃 (Google Maps)
                 </button>
             </div>
             
-            <div v-if="filteredRoutes.length > 0" style="margin-top:15px;">
+            <div v-if="filteredRoutes.length > 0" style="margin-top:15px; padding: 0 4px;">
                 <div v-for="(r, idx) in filteredRoutes" 
                     :key="idx" style="display:flex; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9;">
                     <div style="width:24px;
@@ -250,14 +260,26 @@
                             opacity:0.2;">☰</div>
                         <div style="flex:1" @click="openEdit('flight', f, fi)">
                             <div style="display:flex;
-                                justify-content:space-between; align-items:center; margin-bottom:15px;">
-                                <div><div class="small-label">起飛 {{ f.depT }}</div><div style="font-size:20px;
-                                    font-weight:900;">{{ f.dep }}</div></div>
-                                <div style="flex:1;
-                                    text-align:center;"><div style="font-size:12px; font-weight:800; color:var(--primary);">{{ f.no }}</div><div style="height:1px; background:#cbd5e1; margin:5px 15px;"></div><div style="font-size:10px;
-                                    color:var(--sub);">{{ f.dur }}</div></div>
-                                <div><div class="small-label">到達 {{ f.arrT }}</div><div style="font-size:20px;
-                                    font-weight:900;">{{ f.arr }}</div></div>
+                                justify-content:space-between; align-items:flex-end; margin-bottom:15px;">
+                                <div style="flex: 1; text-align: left;">
+                                    <div class="flight-date-label">{{ formatDateMD(f.depDate) }}</div>
+                                    <div style="font-size:13px; font-weight:800; color:var(--sub); margin-bottom:1px;">{{ f.depT || '--:--' }}</div>
+                                    <div style="font-size:22px; font-weight:900; line-height:1.1;">{{ f.dep || '---' }}</div>
+                                </div>
+                                
+                                <div style="flex:1.2; text-align:center; padding-bottom: 5px;">
+                                    <div style="font-size:12px; font-weight:800; color:var(--primary);">{{ f.no }}</div>
+                                    <div class="flight-line-container">
+                                        <div class="flight-arrow-line"></div>
+                                    </div>
+                                    <div style="font-size:10px; color:var(--sub); font-weight: bold;">{{ f.dur }}</div>
+                                </div>
+                                
+                                <div style="flex: 1; text-align: right;">
+                                    <div class="flight-date-label">{{ formatDateMD(f.arrDate) }}</div>
+                                    <div style="font-size:13px; font-weight:800; color:var(--sub); margin-bottom:1px;">{{ f.arrT || '--:--' }}</div>
+                                    <div style="font-size:22px; font-weight:900; line-height:1.1;">{{ f.arr || '---' }}</div>
+                                </div>
                             </div>
                             <div style="display:flex;
                                 justify-content:space-between; font-size:11px; color:var(--sub); font-weight:bold;"><span>出發: {{ f.terminal || '-' }}</span><span>到達: {{ f.arrTerminal || '-' }}</span></div>
@@ -361,13 +383,11 @@
             grid-template-columns:1fr 1fr; gap:12px; padding:15px;">
             <div v-for="(item, si) in shopping" :key="si" class="card" style="margin:0;
                 padding:12px;">
-                <div @click="triggerFile(si)" style="height:130px; background:#f1f5f9;
-                    border-radius:15px; overflow:hidden; display:flex; align-items:center; justify-content:center; cursor:pointer;">
-                    <img v-if="item.img" :src="item.img" style="width:100%;
-                        height:100%; object-fit:cover;">
-                    <span v-else style="font-size:30px;
-                        opacity:0.2;">📸</span>
-                    <input type="file" :id="'file-'+si" style="display:none" @change="uploadImg($event, si)">
+                <div class="shopping-img-box">
+                    <img v-if="item.img" :src="item.img" class="shopping-img" @click="viewImage(item.img)">
+                    <span v-else style="font-size:30px; opacity:0.2; cursor:pointer;" @click="triggerFile(si)">📸</span>
+                    <button v-if="item.img" class="shopping-upload-btn" @click.stop="triggerFile(si)">🔄</button>
+                    <input type="file" :id="'file-'+si" style="display:none" accept="image/*" @change="uploadImg($event, si)">
                 </div>
                 <input v-model="item.name" placeholder="品名" style="font-weight:800;
                     font-size:14px; margin-top:10px;">
@@ -512,12 +532,16 @@
                 </div>
             </template>
             <template v-else-if="modalType === 'flight'">
+                <div style="display:flex; gap:8px;">
+                    <div style="flex:1;"><label>出發日期</label><div class="input-pill"><input type="date" v-model="editData.depDate"></div></div>
+                    <div style="flex:1;"><label>到達日期</label><div class="input-pill"><input type="date" v-model="editData.arrDate"></div></div>
+                </div>
                 <div style="display:flex;
-                    gap:8px;"><div style="flex:1;"><label>起飛</label><div class="input-pill"><input v-model="editData.dep"></div></div><div style="flex:1;"><label>時間</label><div class="input-pill"><input v-model="editData.depT" placeholder="08:00"></div></div></div>
-                <div style="display:flex; gap:8px;"><div style="flex:1;"><label>到達</label><div class="input-pill"><input v-model="editData.arr"></div></div><div style="flex:1;"><label>時間</label><div class="input-pill"><input v-model="editData.arrT" placeholder="12:00"></div></div></div>
+                    gap:8px;"><div style="flex:1;"><label>出發機場代碼</label><div class="input-pill"><input v-model="editData.dep" placeholder="如: TPE"></div></div><div style="flex:1;"><label>起飛時間</label><div class="input-pill"><input v-model="editData.depT" placeholder="08:00"></div></div></div>
+                <div style="display:flex; gap:8px;"><div style="flex:1;"><label>到達機場代碼</label><div class="input-pill"><input v-model="editData.arr" placeholder="如: NRT"></div></div><div style="flex:1;"><label>到達時間</label><div class="input-pill"><input v-model="editData.arrT" placeholder="12:00"></div></div></div>
                 <div style="display:flex;
                     gap:8px;"><div style="flex:1;"><label>出發航站</label><div class="input-pill"><input v-model="editData.terminal"></div></div><div style="flex:1;"><label>到達航站</label><div class="input-pill"><input v-model="editData.arrTerminal"></div></div></div>
-                <label>班機號碼</label><div class="input-pill"><input v-model="editData.no"></div>
+                <label>班機號碼</label><div class="input-pill"><input v-model="editData.no" placeholder="如: BR198"></div>
                 <label>飛行時間</label><div class="input-pill"><input v-model="editData.dur" placeholder="例如: 3h 15m"></div>
             </template>
             <template v-else-if="modalType === 'hotel'">
@@ -572,7 +596,7 @@ const { createApp, ref, computed, onMounted, watch } = Vue;
 
 createApp({
     setup() {
-        const activeTab = ref('itinerary');
+        const activeTab = ref('transport'); // 方便預覽直接切到交通分頁
         const tripName = ref('');
         const tripDays = ref(5);
         const startDate = ref('2026-05-24');
@@ -659,6 +683,16 @@ createApp({
             }
         };
 
+        // 輔助函式：將 YYYY-MM-DD 格式化為 MM/DD
+        const formatDateMD = (dateStr) => {
+            if (!dateStr) return '--/--';
+            const parts = dateStr.split('-');
+            if (parts.length === 3) {
+                return `${parseInt(parts[1])}/${parseInt(parts[2])}`;
+            }
+            return dateStr;
+        };
+
         const filteredRoutes = computed(() => {
             const dayItems = itineraryData.value[selectedDateIndex.value] || [];
             return dayItems.filter(item => item.location && routeFilters.value.includes(item.type));
@@ -678,8 +712,15 @@ createApp({
                 return `https://maps.google.com/maps?q=${locations[0]}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
             }
             
-            const allPoints = locations.join('|');
-            return `https://maps.google.com/maps?q=${allPoints}&t=&z=12&ie=UTF8&iwloc=&output=embed`;
+            const origin = locations[0];
+            const destination = locations[locations.length - 1];
+            const waypoints = locations.slice(1, -1).join('|');
+            
+            let baseUrl = `https://maps.google.com/maps?saddr=${origin}&daddr=${destination}`;
+            if (waypoints) baseUrl += `+to:${waypoints}`;
+            baseUrl += `&t=&z=12&ie=UTF8&output=embed`;
+            
+            return baseUrl;
         });
 
         const openFullRoute = () => {
@@ -781,7 +822,8 @@ createApp({
                 }
                 editData.value = { type:'景點', name:'', location:'', trans:'空白', startH:'09', startM:'00', endH:'10', endM:'00', note:'', extraImgs:[] };
             }
-            else if(type==='flight') editData.value = { dep:'', depT:'', arr:'', arrT:'', terminal:'', arrTerminal:'', no:'', dur:'' };
+            // 欄位初始化加入 depDate 與 arrDate
+            else if(type==='flight') editData.value = { depDate:'', arrDate:'', dep:'', depT:'', arr:'', arrT:'', terminal:'', arrTerminal:'', no:'', dur:'' };
             else if(type==='hotel') editData.value = { name:'', checkIn:'', checkOut:'', address:'', note:'' };
             else if(type==='car') editData.value = { company:'', address:'', dateStart:'', dateEnd:'', note:'' };
             showModal.value = true;
@@ -853,7 +895,20 @@ createApp({
 
         const triggerFile = (i) => document.getElementById('file-'+i).click();
         const uploadImg = (e, i) => {
-            const reader=new FileReader(); reader.onload=(r)=>shopping.value[i].img=r.target.result; reader.readAsDataURL(e.target.files[0]);
+            const file = e.target.files[0]; if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (r) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                    const maxW = 600; const scale = Math.min(maxW / img.width, 1);
+                    canvas.width = img.width * scale; canvas.height = img.height * scale;
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    shopping.value[i].img = canvas.toDataURL('image/jpeg', 0.7);
+                };
+                img.src = r.target.result;
+            };
+            reader.readAsDataURL(file); e.target.value = '';
         };
 
         const dates = computed(() => {
@@ -891,7 +946,7 @@ createApp({
         if(weatherCity.value) fetchWeather();
         calcT();
 
-        return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, addCheck, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, importData, exportString, importString, weatherCity, weatherList, fetchWeather, currentWeather, openGoogleWeather, viewImage, routeFilters, filteredRoutes, toggleRouteFilter, openFullRoute, inlineMapUrl, newCurrencyKey, newCurrencyValue, addCustomRate, showImgModal, previewImgSrc, newCheck, newTodo };
+        return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, addCheck, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, importData, exportString, importString, weatherCity, weatherList, fetchWeather, currentWeather, openGoogleWeather, viewImage, routeFilters, filteredRoutes, toggleRouteFilter, openFullRoute, inlineMapUrl, newCurrencyKey, newCurrencyValue, addCustomRate, showImgModal, previewImgSrc, newCheck, newTodo, formatDateMD };
     }
 })
 .component('draggable', window.vuedraggable)
