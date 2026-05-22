@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Travel Luxe Pro - Precision Edition V2.9</title>
+    <title>Travel Luxe Pro - Precision Edition V3.0</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vuedraggable@4.1.0/dist/vuedraggable.umd.min.js"></script>
@@ -66,9 +66,11 @@
         }
         label { font-size: 12px; font-weight: 800; color: var(--sub);
             margin: 0 0 5px 5px; display: block; }
-        .map-link { color: var(--primary);
-            font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 4px; display: inline-block;
+        
+        .map-link { color: #475569;
+            font-size: 12px; font-weight: 700; cursor: pointer; margin-top: 4px; display: inline-block; text-decoration: none;
         }
+        
         .btn-action { width: 100%; padding: 12px; border-radius: 12px; font-weight: 900; border: none;
             cursor: pointer; margin-top: 10px; }
         .img-container { display: flex; gap: 8px; overflow-x: auto;
@@ -78,8 +80,11 @@
         .weather-card { display: flex;
             align-items: center; justify-content: space-between; background: #f1f5f9; padding: 15px 20px; border-radius: 20px; cursor: pointer;
         }
+        
+        /* 📝 備註底色區塊樣式 */
         .note-box { background: #f1f5f9; border-radius: 12px; padding: 10px; font-size: 11px; color: var(--sub);
             margin-top: 8px; line-height: 1.4; }
+            
         .filter-tag { padding: 6px 12px; border-radius: 10px;
             font-size: 11px; font-weight: 800; background: #f1f5f9; color: var(--sub); cursor: pointer;
         }
@@ -148,7 +153,7 @@
                             margin: '0 0 12px',
                             display: 'flex',
                             flexDirection: 'column',
-                            borderLeft: '6px solid ' + ({'景點':'#4f46e5','飲食':'#f59e0b','航班':'#06b6d4','住宿':'#10b981','交通':'#ec4899','其他':'#64748b'}[element.type] || '#cbd5e1'),
+                            borderLeft: '6px solid ' + ({'景點':'#4f46e5','飲食':'#f59e0b','航班':'#06b6d4','住宿':'#10b981','交通':'#ec4899','核心':'#4f46e5','其他':'#64748b'}[element.type] || '#cbd5e1'),
                             paddingLeft: '16px'
                         }">
                             <div style="display:flex; align-items:center; width:100%;">
@@ -262,7 +267,7 @@
                             <div style="font-weight:900; font-size:16px;">{{ h.name }}</div>
                             <div style="font-size:12px; color:var(--primary); font-weight:700;">📅 {{ h.checkIn }} - {{ h.checkOut }}</div>
                             <div v-if="h.address" @click="openMap(h.address)" class="map-link">📍 {{ h.address }}</div>
-                            <div v-if="h.note" style="font-size:11px; color:var(--sub); margin-top:4px; opacity:0.8;">📝 {{ h.note }}</div>
+                            <div v-if="h.note" class="note-box">📝 {{ h.note }}</div>
                         </div>
                         <button @click="openEdit('hotel', h, hi)" style="border:none; background:none; font-size:10px; opacity:0.3;">✏️</button>
                     </div>
@@ -280,7 +285,7 @@
                             <div style="font-weight:900; font-size:16px;">{{ c.company }}</div>
                             <div style="font-size:12px; color:var(--primary); font-weight:700;">📅 {{ c.dateStart }} - {{ c.dateEnd }}</div>
                             <div v-if="c.address" @click="openMap(c.address)" class="map-link">📍 {{ c.address }}</div>
-                            <div v-if="c.note" style="font-size:11px; color:var(--sub); margin-top:4px; opacity:0.8;">📝 {{ c.note }}</div>
+                            <div v-if="c.note" class="note-box">📝 {{ c.note }}</div>
                         </div>
                         <button @click="openEdit('car', c, ci)" style="border:none; background:none; font-size:10px; opacity:0.3;">✏️</button>
                     </div>
@@ -391,7 +396,7 @@
             <h2 style="margin-top:0; letter-spacing:-1px;">編輯項目</h2>
             <template v-if="modalType === 'itinerary'">
                 <label>行程類別</label>
-                <div class="input-pill"><select v-model="editData.type"><option v-for="c in ['景點','飲食','航班','住宿','交通','其他']" :value="c">{{c}}</option></select></div>
+                <div class="input-pill"><select v-model="editData.type"><option v-for="c in ['景點','飲食','航班','住宿','交通','核心','其他']" :value="c">{{c}}</option></select></div>
                 <label>行程名稱</label><div class="input-pill"><input v-model="editData.name"></div>
                 <label>地點</label><div class="input-pill"><input v-model="editData.location"></div>
                 <label>交通方式</label>
@@ -489,7 +494,7 @@ const { createApp, ref, computed, onMounted, watch } = Vue;
 
 createApp({
     setup() {
-        const activeTab = ref('route'); // 預設開啟規劃分頁以利立即測試
+        const activeTab = ref('itinerary');
         const tripName = ref('');
         const tripDays = ref(5);
         const startDate = ref('2026-05-24');
@@ -516,7 +521,7 @@ createApp({
         const weatherList = ref([]);
         const exportString = ref('');
         const importString = ref('');
-        const routeFilters = ref(['景點','飲食','航班','住宿','交通','核心']);
+        const routeFilters = ref(['景點','飲食','航班','住宿','交通','核心','其他']);
         const showImgModal = ref(false);
         const previewImgSrc = ref('');
 
@@ -588,33 +593,19 @@ createApp({
             idx > -1 ? routeFilters.value.splice(idx, 1) : routeFilters.value.push(cat);
         };
 
-        // 🌟 核心修正：改用 Google 官方最穩定的動態經典多點導航，強迫地圖伺服器將所有點完美包覆
         const inlineMapUrl = computed(() => {
             if (filteredRoutes.value.length === 0) return '';
-            
-            // 提煉當天有填寫地址的所有地點清單
             const locList = filteredRoutes.value.map(r => r.location.trim()).filter(l => l !== '');
             if (locList.length === 0) return '';
-
-            // 1. 如果只有一個地點，顯示標準單點大頭針
             if (locList.length === 1) {
                 return `https://maps.google.com/maps?q=${encodeURIComponent(locList[0])}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
             }
-
-            // 2. 當有複數地點時：利用 Google 經典的 Direction 參數架構
-            // 起點為地點 1，終點為最後一個地點
             const origin = locList[0];
             const destination = locList[locList.length - 1];
-            
-            // 中間所有的點（地點 2 ~ 倒數第二個點）全部打包串接進 to 欄位
             let midPoints = '';
             if (locList.length > 2) {
                 midPoints = '+to:' + locList.slice(1, -1).map(l => encodeURIComponent(l)).join('+to:');
             }
-
-            // ⚠️ 關鍵：saddr (起點) + daddr (終點加中間點) + output=embed
-            // 這個架構會「百分之百」觸發 Google 地圖內建的 Bounding Box 自動適配計算，
-            // 無論地點相隔多遠或多近，都會自動調整縮放級別（Zoom Level），保證全數放進畫面。
             return `https://maps.google.com/maps?saddr=${encodeURIComponent(origin)}&daddr=${encodeURIComponent(destination)}${midPoints}&t=&z=12&ie=UTF8&iwloc=&output=embed`;
         });
 
@@ -632,7 +623,7 @@ createApp({
                 const { latitude: lat, longitude: lon } = geoData.results[0];
 
                 const weaRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`);
-                const weaData = await weRes.json();
+                const weaData = await weaRes.json();
 
                 const codeToIcon = (c) => {
                     if (c <= 3) return '☀️';
@@ -799,7 +790,7 @@ createApp({
         });
 
         const openMap = (l) => { window.open(`https://maps.google.com/maps?q=${encodeURIComponent(l)}`, '_blank'); };
-        const getIcon = (t) => ({ '景點':'📷','飲食':'🍴','航班':'✈️','住宿':'🏠','交通':'🚌','其他':'⚙️' }[t] || '✨');
+        const getIcon = (t) => ({ '景點':'📷','飲食':'🍴','航班':'✈️','住宿':'🏠','交通':'🚌','核心':'📷','其他':'⚙️' }[t] || '✨');
         const getTransIcon = (t) => ({ '地鐵':'🚇','巴士':'🚌','火車':'🚄','飛機':'✈️','步行':'🚶','計程車':'🚕' }[t] || '🚶');
 
         const generateExport = () => {
