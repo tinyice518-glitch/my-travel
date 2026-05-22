@@ -388,8 +388,8 @@
 
             <div style="margin-top:25px; padding-top:20px; border-top:2px dashed #f1f5f9;">
                 <h3 style="margin-top:0; color:var(--primary);">📤 行程分享</h3>
-                <p style="font-size:12px; color:var(--sub); margin-top: -5px; line-height:1.4;">點擊產生的專屬網址，對方點開即可免匯入直接觀看你的行程（預設唯讀模式）。</p>
-                <button @click="copyShareLink" class="btn-action" style="background:#10b981; color:white; margin-top:8px;">🔗 複製專屬分享網址</button>
+                <p style="font-size:12px; color:var(--sub); margin-top: -5px; line-height:1.4;">點擊下方按鈕將自動產生精簡短網址，親友點開即可直接看你的行程（預設唯讀模式，適合 LINE 傳送）。</p>
+                <button @click="copyShareLink" class="btn-action" style="background:#10b981; color:white; margin-top:8px;">🔗 產生並複製專屬短網址</button>
             </div>
 
             <div style="margin-top:25px; padding-top:20px; border-top:2px dashed #f1f5f9;">
@@ -471,7 +471,6 @@ createApp({
         };
 
         const loadData = () => {
-            // 🌟 檢查網址中是否含有分享的加密資料串
             const hash = window.location.hash;
             if (hash && hash.startsWith('#share=')) {
                 try {
@@ -532,22 +531,44 @@ createApp({
             localStorage.setItem('travel_luxe_pro_data', JSON.stringify(obj));
         };
 
-        // 生成分享連結並複製到剪貼簿
-        const copyShareLink = () => {
+        // 🌟 方案二：生成長網址、自動調用 TinyURL 縮短並複製到剪貼簿 (包含降級 Fallback 處理)
+        const copyShareLink = async () => {
             const obj = { 
                 tripName: tripName.value, tripDays: tripDays.value, startDate: startDate.value, 
                 itinerary: itineraryData.value, flightsList: flightsList.value, transport: transport.value, 
                 checklist: checklist.value, todos: todos.value, shopping: shopping.value, 
                 rates: rates.value, weatherCity: weatherCity.value, weatherList: weatherList.value 
             };
-            const base64String = btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
-            const shareUrl = window.location.origin + window.location.pathname + '#share=' + base64String;
             
-            navigator.clipboard.writeText(shareUrl).then(() => { 
-                alert('專屬分享網址已複製！對方點開即可直接觀看。'); 
-            }).catch(() => { 
-                alert('複製失敗，請手動複製產生的網址。'); 
-            });
+            try {
+                // 1. 產生原始完整長網址
+                const base64String = btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+                const longUrl = window.location.origin + window.location.pathname + '#share=' + base64String;
+                
+                // 2. 異步呼叫 TinyURL 免費公開 API（支援 CORS 跨域）
+                const response = await fetch(`https://tinyurl.com/api-create.php?url=${encodeURIComponent(longUrl)}`);
+                
+                if (response.ok) {
+                    const shortUrl = await response.text();
+                    // 3. 複製精簡後的短網址
+                    await navigator.clipboard.writeText(shortUrl);
+                    alert('🎉 專屬短網址已成功複製！\n\n網址已自動完成壓縮，您可以直接到 LINE 或臉書貼上傳給親友囉！');
+                } else {
+                    throw new Error('API 反應異常');
+                }
+            } catch (error) {
+                console.error("短網址轉換失敗，自動切換複製原始長網址作為備援方案", error);
+                
+                // 4. 降級（Fallback）方案：若 API 或網路異常，仍生成長網址供複製，確保功能永不斷線
+                const base64String = btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+                const longUrl = window.location.origin + window.location.pathname + '#share=' + base64String;
+                
+                navigator.clipboard.writeText(longUrl).then(() => { 
+                    alert('專屬分享網址已複製！\n\n(提示：因網路環境未能成功連線自動縮網址。若網址過長導致通訊軟體無法傳送，建議您可手動將連結貼到 PicSee 或 TinyURL 網站進行縮短。)'); 
+                }).catch(() => { 
+                    alert('複製失敗，請手動複製產生的網址。'); 
+                });
+            }
         };
 
         const exitReadOnly = () => {
@@ -807,7 +828,7 @@ createApp({
 
         calcT();
 
-        return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, addCheck, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, importData, exportString, importString, weatherCity, weatherList, fetchWeather, currentWeather, openGoogleWeather, viewImage, routeFilters, filteredRoutes, toggleRouteFilter, inlineMapUrl, newCurrencyKey, newCurrencyValue, addCustomRate, showImgModal, previewImgSrc, newCheck, newTodo, formatDateMD, isReadOnly, copyShareLink, exitReadOnly };
+        return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, addCheck, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, importData, exportString, importString, weatherCity, weatherList, fetchWeather, currentWeather, openGoogleWeather, viewImage, routeFilters, filteredRoutes, toggleRouteFilter, inlineMapUrl, newCurrencyKey, newCurrencyValue, addCustomRate, showImgModal, previewImgSrc, newCheck, newTodo, isReadOnly, copyShareLink, exitReadOnly, formatDateMD };
     }
 })
 .component('draggable', window.vuedraggable)
