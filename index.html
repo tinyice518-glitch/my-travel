@@ -90,8 +90,8 @@
         }
         .filter-tag.active { background: var(--primary); color: white;
         }
-        .map-container { width: 100%; height: 450px; border-radius: 18px; overflow: hidden; margin-top: 15px;
-            border: 1px solid #e2e8f0; }
+        .map-container { width: 100%; height: 520px; border-radius: 18px; overflow: hidden; margin-top: 15px;
+            border: 1px solid #e2e8f0; position: relative; }
         .shopping-img-box { position: relative; height: 130px; background: #f1f5f9; border-radius: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .shopping-img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
         .shopping-upload-btn { position: absolute; bottom: 8px; right: 8px; background: rgba(15, 23, 42, 0.6); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); }
@@ -153,7 +153,7 @@
                             margin: '0 0 12px',
                             display: 'flex',
                             flexDirection: 'column',
-                            borderLeft: '6px solid ' + ({'景點':'#4f46e5','飲食':'#f59e0b','航班':'#06b6d4','住宿':'#10b981','交通':'#ec4899','核心':'#4f46e5','其他':'#64748b'}[element.type] || '#cbd5e1'),
+                            borderLeft: '6px solid ' + ({'景點':'#4f46e5','飲食':'#f59e0b','航班':'#06b6d4','住宿':'#10b981','交通':'#ec4899','其他':'#64748b'}[element.type] || '#cbd5e1'),
                             paddingLeft: '16px'
                         }">
                             <div style="display:flex; align-items:center; width:100%;">
@@ -186,7 +186,7 @@
         <header class="header">
             <h1>🗺️ 路線規劃</h1>
             <div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:5px; scrollbar-width:none;">
-                <div v-for="cat in ['景點','飲食','航班','住宿','交通','核心']" :key="cat" class="filter-tag" :class="{active: routeFilters.includes(cat)}" @click="toggleRouteFilter(cat)">
+                <div v-for="cat in ['景點','飲食','航班','住宿','交通','其他']" :key="cat" class="filter-tag" :class="{active: routeFilters.includes(cat)}" @click="toggleRouteFilter(cat)">
                     {{ cat }}
                 </div>
             </div>
@@ -200,22 +200,74 @@
         </div>
 
         <div class="card route-card">
-            <h3 style="margin-top:0; padding-left: 4px;">今日路線總覽 ({{ filteredRoutes.length }} 個地點)</h3>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; padding: 0 4px; flex-wrap:wrap; gap:8px;">
+                <h3 style="margin:0; font-size:16px;">今日路線總覽 ({{ filteredRoutes.length }} 個地點)</h3>
+                
+                <!-- 交通工具切換器 -->
+                <div style="display:flex; background:#f1f5f9; padding:4px; border-radius:10px; gap:4px;">
+                    <button v-for="mode in [
+                        { key: 'r', icon: '🚇', label: '大眾' },
+                        { key: 'w', icon: '🚶', label: '步行' },
+                        { key: 'd', icon: '🚗', label: '開車' }
+                    ]" :key="mode.key" 
+                    @click="defaultTravelMode = mode.key"
+                    :style="{
+                        border: 'none',
+                        background: defaultTravelMode === mode.key ? 'var(--primary)' : 'transparent',
+                        color: defaultTravelMode === mode.key ? 'white' : 'var(--sub)',
+                        fontSize: '11px',
+                        fontWeight: '900',
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        transition: '0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '2px'
+                    }">
+                        <span>{{ mode.icon }}</span>
+                        <span>{{ mode.label }}</span>
+                    </button>
+                </div>
+            </div>
             
             <div v-if="filteredRoutes.length > 0" class="map-container">
                 <iframe width="100%" height="100%" frameborder="0" style="border:0" :src="inlineMapUrl" allowfullscreen></iframe>
+                
+                <!-- 浮動返回全線按鈕 -->
+                <button v-if="focusedLocation" @click="focusedLocation = null" 
+                        style="position: absolute; top: 12px; left: 12px; background: rgba(255, 255, 255, 0.95); color: var(--primary); border: 1px solid #e2e8f0; padding: 8px 14px; border-radius: 20px; font-weight: 800; font-size: 11px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; display: flex; align-items: center; gap: 4px; backdrop-filter: blur(4px); transition: 0.2s; z-index: 10; border: none;">
+                    <span>🔙</span>
+                    <span>返回整日路線</span>
+                </button>
             </div>
             
-            <div v-if="filteredRoutes.length > 0" style="margin-top:15px; padding: 0 4px;">
-                <div v-for="(r, idx) in filteredRoutes" :key="idx" style="display:flex; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9;">
-                    <div style="width:24px; height:24px; background:var(--primary); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; margin-right:12px;">
+            <!-- 可滾動的地點列表 -->
+            <div v-if="filteredRoutes.length > 0" style="margin-top:15px; padding: 4px; max-height: 280px; overflow-y: auto; scrollbar-width: thin; border: 1px solid #f1f5f9; border-radius: 16px; display:flex; flex-direction:column; gap:6px;">
+                <div v-for="(r, idx) in filteredRoutes" :key="idx" 
+                     @click="focusedLocation = (focusedLocation === r.location ? null : r.location)"
+                     :style="{
+                         display: 'flex',
+                         alignItems: 'center',
+                         padding: '12px 10px',
+                         cursor: 'pointer',
+                         transition: '0.2s',
+                         borderRadius: '12px',
+                         background: focusedLocation === r.location ? '#e0e7ff' : 'transparent',
+                         borderLeft: focusedLocation === r.location ? '4px solid var(--primary)' : 'none',
+                         paddingLeft: focusedLocation === r.location ? '6px' : '10px'
+                     }">
+                    <div style="width:24px; height:24px; background:var(--primary); color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; margin-right:12px; flex-shrink: 0;">
                         {{ idx + 1 }}
                     </div>
                     <div style="flex:1;">
-                        <div style="font-weight:800; font-size:15px;">{{ r.name }}</div>
+                        <div style="font-weight:800; font-size:15px;" :style="{ color: focusedLocation === r.location ? 'var(--primary)' : 'inherit' }">{{ r.name }}</div>
                         <div style="font-size:11px; color:var(--sub);">{{ r.startH }}:{{ r.startM }} ‧ {{ r.location }}</div>
                     </div>
-                    <button @click="openMap(r.location)" style="border:none; background:#f1f5f9; padding:8px; border-radius:10px; font-size:14px;">📍</button>
+                    <div style="font-size:14px; opacity:0.6; flex-shrink: 0;">
+                        <span v-if="focusedLocation === r.location" style="font-size:10px; font-weight:800; color:var(--primary); background:white; padding:4px 8px; border-radius:6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">🔍 鎖定</span>
+                        <span v-else>📍</span>
+                    </div>
                 </div>
             </div>
             <div v-else style="text-align:center; padding:40px 0; color:var(--sub); font-weight:700;">
@@ -381,11 +433,41 @@
             </div>
 
             <div style="margin-top:25px; padding-top:20px; border-top:2px dashed #f1f5f9;">
-                <h3 style="margin-top:0;">🔗 資料分享與備份 (長代碼)</h3>
-                <button @click="generateExport" class="btn-action" style="background:var(--primary); color:white;">複製匯出代碼</button>
-                <div style="margin-top:15px;">
-                    <textarea v-model="importString" style="background:#f1f5f9; border-radius:12px; padding:10px; font-size:10px; height:60px; width:100%; box-sizing:border-box;" placeholder="在此貼上代碼..."></textarea>
-                    <button @click="importData" class="btn-action" style="background:var(--text); color:white;">執行匯入行程</button>
+                <h3 style="margin-top:0; font-size:16px;">🔗 行程分享與備份</h3>
+                
+                <!-- 雙軌匯出選項 -->
+                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:16px;">
+                        <h4 style="margin:0 0 6px; font-size:13px; font-weight:800; color:var(--text);">📋 快速分享 (適合 LINE 貼上)</h4>
+                        <p style="margin:0 0 10px; font-size:11px; color:var(--sub); line-height:1.4;">極速壓縮，只保留景點、時間、路線與待辦事項（不含照片），代碼極短好傳送！</p>
+                        <button @click="generateCompactExport" class="btn-action" style="background:var(--primary); color:white; margin-top:0; padding:10px; font-size:13px; border-radius:10px;">複製極簡分享代碼</button>
+                    </div>
+                    
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:16px;">
+                        <h4 style="margin:0 0 6px; font-size:13px; font-weight:800; color:var(--text);">💾 完整備份 (含所有照片)</h4>
+                        <p style="margin:0 0 10px; font-size:11px; color:var(--sub); line-height:1.4;">打包所有日程、購物清單及上傳的景點照片，可直接傳送檔案給旅伴。</p>
+                        <button @click="exportToFile" class="btn-action" style="background:#10b981; color:white; margin-top:0; padding:10px; font-size:13px; border-radius:10px;">匯出完整行程檔案 (.json)</button>
+                    </div>
+                </div>
+
+                <!-- 統一匯入區塊 -->
+                <div style="background:#f1f5f9; padding:18px; border-radius:20px;">
+                    <h4 style="margin:0 0 10px; font-size:13px; font-weight:800;">📥 匯入外部行程</h4>
+                    
+                    <!-- 代碼貼上匯入 -->
+                    <textarea v-model="importString" style="background:white; border:1px solid #cbd5e1; border-radius:12px; padding:10px; font-size:10px; height:60px; width:100%; box-sizing:border-box;" placeholder="貼上「極簡代碼」或「舊版長代碼」..."></textarea>
+                    <button @click="importData" class="btn-action" style="background:var(--text); color:white; margin-top:8px; padding:10px; font-size:13px; border-radius:10px;">貼上代碼執行匯入</button>
+                    
+                    <!-- 分隔線 -->
+                    <div style="text-align:center; font-size:11px; color:var(--sub); margin:12px 0; font-weight:700; position:relative; display:flex; align-items:center; justify-content:center; gap:10px;">
+                        <span style="flex:1; height:1px; background:#cbd5e1;"></span>
+                        <span>或</span>
+                        <span style="flex:1; height:1px; background:#cbd5e1;"></span>
+                    </div>
+
+                    <!-- 檔案選擇匯入 -->
+                    <button @click="triggerImportFile" class="btn-action" style="background:transparent; border:2px dashed var(--sub); color:var(--sub); margin-top:0; padding:10px; font-size:13px; border-radius:10px;">上傳完整行程檔案 (.json)</button>
+                    <input type="file" id="import-file-input" style="display:none" accept=".json" @change="importFromFile">
                 </div>
             </div>
         </div>
@@ -396,7 +478,7 @@
             <h2 style="margin-top:0; letter-spacing:-1px;">編輯項目</h2>
             <template v-if="modalType === 'itinerary'">
                 <label>行程類別</label>
-                <div class="input-pill"><select v-model="editData.type"><option v-for="c in ['景點','飲食','航班','住宿','交通','核心','其他']" :value="c">{{c}}</option></select></div>
+                <div class="input-pill"><select v-model="editData.type"><option v-for="c in ['景點','飲食','航班','住宿','交通','其他']" :value="c">{{c}}</option></select></div>
                 <label>行程名稱</label><div class="input-pill"><input v-model="editData.name"></div>
                 <label>地點</label><div class="input-pill"><input v-model="editData.location"></div>
                 <label>交通方式</label>
@@ -521,7 +603,9 @@ createApp({
         const weatherList = ref([]);
         const exportString = ref('');
         const importString = ref('');
-        const routeFilters = ref(['景點','飲食','航班','住宿','交通','核心','其他']);
+        const routeFilters = ref(['景點','飲食','航班','住宿','交通','其他']);
+        const defaultTravelMode = ref('r');
+        const focusedLocation = ref(null);
         const showImgModal = ref(false);
         const previewImgSrc = ref('');
 
@@ -594,6 +678,9 @@ createApp({
         };
 
         const inlineMapUrl = computed(() => {
+            if (focusedLocation.value) {
+                return `https://maps.google.com/maps?q=${encodeURIComponent(focusedLocation.value)}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
+            }
             if (filteredRoutes.value.length === 0) return '';
             const locList = filteredRoutes.value.map(r => r.location.trim()).filter(l => l !== '');
             if (locList.length === 0) return '';
@@ -606,7 +693,7 @@ createApp({
             if (locList.length > 2) {
                 midPoints = '+to:' + locList.slice(1, -1).map(l => encodeURIComponent(l)).join('+to:');
             }
-            return `https://maps.google.com/maps?saddr=${encodeURIComponent(origin)}&daddr=${encodeURIComponent(destination)}${midPoints}&t=&z=12&ie=UTF8&iwloc=&output=embed`;
+            return `https://maps.google.com/maps?saddr=${encodeURIComponent(origin)}&daddr=${encodeURIComponent(destination)}${midPoints}&dirflg=${defaultTravelMode.value}&t=&z=12&ie=UTF8&iwloc=&output=embed`;
         });
 
         const openGoogleWeather = () => {
@@ -647,7 +734,10 @@ createApp({
             return weatherList.value.find(w => w.fullDate === targetDate) || {};
         });
 
-        watch(selectedDateIndex, () => { if(weatherCity.value && weatherList.value.length === 0) fetchWeather(); });
+        watch(selectedDateIndex, () => {
+            focusedLocation.value = null;
+            if(weatherCity.value && weatherList.value.length === 0) fetchWeather();
+        });
 
         const calcGap = (prev, next) => {
             if(!prev || !next) return '';
@@ -790,19 +880,146 @@ createApp({
         });
 
         const openMap = (l) => { window.open(`https://maps.google.com/maps?q=${encodeURIComponent(l)}`, '_blank'); };
-        const getIcon = (t) => ({ '景點':'📷','飲食':'🍴','航班':'✈️','住宿':'🏠','交通':'🚌','核心':'📷','其他':'⚙️' }[t] || '✨');
+        const getIcon = (t) => ({ '景點':'📷','飲食':'🍴','航班':'✈️','住宿':'🏠','交通':'🚌','其他':'⚙️' }[t] || '✨');
         const getTransIcon = (t) => ({ '地鐵':'🚇','巴士':'🚌','火車':'🚄','飛機':'✈️','步行':'🚶','計程車':'🚕' }[t] || '🚶');
+
+        const compressData = (raw) => {
+            const compact = {
+                n: raw.tripName || '',
+                d: raw.startDate || '',
+                y: raw.tripDays || 5,
+                w: raw.weatherCity || '',
+                r: raw.rates || {},
+                i: {},
+                f: (raw.flightsList || []).map(f => [
+                    f.depDate || '', f.arrDate || '', f.dep || '', f.depT || '', 
+                    f.arr || '', f.arrT || '', f.terminal || '', f.arrTerminal || '', 
+                    f.no || '', f.dur || ''
+                ]),
+                h: ((raw.transport && raw.transport.hotels) || []).map(h => [
+                    h.name || '', h.checkIn || '', h.checkOut || '', h.address || '', h.note || ''
+                ]),
+                c: ((raw.transport && raw.transport.cars) || []).map(c => [
+                    c.company || '', c.address || '', c.dateStart || '', c.dateEnd || '', c.note || ''
+                ]),
+                k: (raw.checklist || []).map(item => [item.name || '', item.done ? 1 : 0]),
+                t: (raw.todos || []).map(item => [item.name || '', item.done ? 1 : 0]),
+                s: (raw.shopping || []).map(item => [item.name || '', item.price || 0])
+            };
+
+            for (const key in raw.itinerary || {}) {
+                compact.i[key] = (raw.itinerary[key] || []).map(item => [
+                    item.type || '景點', item.name || '', item.location || '', item.trans || '空白',
+                    item.startH || '09', item.startM || '00', item.endH || '10', item.endM || '00',
+                    item.note || ''
+                ]);
+            }
+            return compact;
+        };
+
+        const decompressData = (compact) => {
+            const raw = {
+                tripName: compact.n || '',
+                startDate: compact.d || '',
+                tripDays: compact.y || 5,
+                weatherCity: compact.w || '',
+                rates: compact.r || { JPY: 4.65, USD: 0.031, EUR: 0.029, KRW: 41.5 },
+                itinerary: {},
+                flightsList: (compact.f || []).map(arr => ({
+                    depDate: arr[0], arrDate: arr[1], dep: arr[2], depT: arr[3],
+                    arr: arr[4], arrT: arr[5], terminal: arr[6], arrTerminal: arr[7],
+                    no: arr[8], dur: arr[9]
+                })),
+                transport: {
+                    hotels: (compact.h || []).map(arr => ({
+                        name: arr[0], checkIn: arr[1], checkOut: arr[2], address: arr[3], note: arr[4]
+                    })),
+                    cars: (compact.c || []).map(arr => ({
+                        company: arr[0], address: arr[1], dateStart: arr[2], dateEnd: arr[3], note: arr[4]
+                    }))
+                },
+                checklist: (compact.k || []).map(arr => ({ name: arr[0], done: !!arr[1] })),
+                todos: (compact.t || []).map(arr => ({ name: arr[0], done: !!arr[1] })),
+                shopping: (compact.s || []).map(arr => ({ name: arr[0], price: arr[1], img: null })),
+                weatherList: []
+            };
+
+            for (const key in compact.i || {}) {
+                raw.itinerary[key] = (compact.i[key] || []).map(arr => ({
+                    type: arr[0], name: arr[1], location: arr[2], trans: arr[3],
+                    startH: arr[4], startM: arr[5], endH: arr[6], endM: arr[7],
+                    note: arr[8], extraImgs: []
+                }));
+            }
+            return raw;
+        };
 
         const generateExport = () => {
             const obj = { tripName: tripName.value, tripDays: tripDays.value, startDate: startDate.value, itinerary: itineraryData.value, flightsList: flightsList.value, transport: transport.value, checklist: checklist.value, todos: todos.value, shopping: shopping.value, rates: rates.value, weatherCity: weatherCity.value };
             exportString.value = btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
-            navigator.clipboard.writeText(exportString.value).then(() => { alert('代碼已複製到剪貼簿！'); }).catch(() => { alert('複製失敗，請手動全選複製。'); });
+            navigator.clipboard.writeText(exportString.value).then(() => { alert('完整代碼已複製到剪貼簿！'); }).catch(() => { alert('複製失敗，請手動複製。'); });
+        };
+
+        const generateCompactExport = () => {
+            const raw = { tripName: tripName.value, tripDays: tripDays.value, startDate: startDate.value, itinerary: itineraryData.value, flightsList: flightsList.value, transport: transport.value, checklist: checklist.value, todos: todos.value, shopping: shopping.value, rates: rates.value, weatherCity: weatherCity.value };
+            const compact = compressData(raw);
+            const str = btoa(unescape(encodeURIComponent(JSON.stringify(compact))));
+            navigator.clipboard.writeText(str).then(() => { alert('極簡分享代碼已複製到剪貼簿！可直接貼上 LINE 傳送！'); }).catch(() => { alert('複製失敗，請手動複製。'); });
+        };
+
+        const exportToFile = () => {
+            const obj = { tripName: tripName.value, tripDays: tripDays.value, startDate: startDate.value, itinerary: itineraryData.value, flightsList: flightsList.value, transport: transport.value, checklist: checklist.value, todos: todos.value, shopping: shopping.value, rates: rates.value, weatherCity: weatherCity.value };
+            const str = JSON.stringify(obj, null, 2);
+            const blob = new Blob([str], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `Travel_Luxe_${tripName.value || '行程'}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        const triggerImportFile = () => {
+            document.getElementById('import-file-input').click();
+        };
+
+        const importFromFile = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                try {
+                    const decoded = JSON.parse(evt.target.result);
+                    if (confirm('確定匯入並覆蓋目前行程嗎？')) {
+                        tripName.value = decoded.tripName; 
+                        tripDays.value = decoded.tripDays; 
+                        startDate.value = decoded.startDate; 
+                        itineraryData.value = decoded.itinerary; 
+                        flightsList.value = decoded.flightsList; 
+                        transport.value = decoded.transport; 
+                        checklist.value = decoded.checklist; 
+                        todos.value = decoded.todos || []; 
+                        shopping.value = decoded.shopping; 
+                        rates.value = decoded.rates; 
+                        weatherCity.value = decoded.weatherCity || ''; 
+                        fetchWeather();
+                        alert('行程檔案匯入成功！');
+                    }
+                } catch(err) {
+                    alert('無效的行程檔案格式。');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
         };
 
         const importData = () => {
             if(!importString.value.trim()) return alert('請貼上匯入代碼。');
             try {
-                const decoded = JSON.parse(decodeURIComponent(escape(atob(importString.value))));
+                const decodedRaw = JSON.parse(decodeURIComponent(escape(atob(importString.value.trim()))));
+                const decoded = decodedRaw.n !== undefined ? decompressData(decodedRaw) : decodedRaw;
                 if(confirm('確定匯入並覆蓋嗎？')){
                     tripName.value = decoded.tripName; tripDays.value = decoded.tripDays; startDate.value = decoded.startDate; itineraryData.value = decoded.itinerary; flightsList.value = decoded.flightsList; transport.value = decoded.transport; checklist.value = decoded.checklist; todos.value = decoded.todos || []; shopping.value = decoded.shopping; rates.value = decoded.rates; weatherCity.value = decoded.weatherCity || ''; fetchWeather();
                     alert('匯入成功！');
@@ -812,7 +1029,7 @@ createApp({
 
         calcT();
 
-        return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, addCheck, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, importData, exportString, importString, weatherCity, weatherList, fetchWeather, currentWeather, openGoogleWeather, viewImage, routeFilters, filteredRoutes, toggleRouteFilter, inlineMapUrl, newCurrencyKey, newCurrencyValue, addCustomRate, showImgModal, previewImgSrc, newCheck, newTodo, formatDateMD };
+        return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, addCheck, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, generateCompactExport, exportToFile, triggerImportFile, importFromFile, importData, exportString, importString, weatherCity, weatherList, fetchWeather, currentWeather, openGoogleWeather, viewImage, routeFilters, filteredRoutes, toggleRouteFilter, inlineMapUrl, defaultTravelMode, focusedLocation, newCurrencyKey, newCurrencyValue, addCustomRate, showImgModal, previewImgSrc, newCheck, newTodo, formatDateMD };
     }
 })
 .component('draggable', window.vuedraggable)
