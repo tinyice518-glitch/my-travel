@@ -13,15 +13,21 @@
             --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --sub: #64748b;
             --radius: 24px; --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
         }
+        body.dark-theme {
+            --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --sub: #94a3b8;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
         body { background: var(--bg); font-family: -apple-system, "PingFang TC", sans-serif; margin: 0;
-            padding-bottom: 120px; color: var(--text); -webkit-font-smoothing: antialiased; }
+            padding-bottom: 120px; color: var(--text); -webkit-font-smoothing: antialiased;
+            transition: background 0.3s, color 0.3s; }
         [v-cloak] { display: none; }
         input, select, textarea { border: none; background: transparent; outline: none; font-family: inherit;
             width: 100%; color: inherit; }
-        .header { background: white; padding: 60px 25px 25px;
-            border-radius: 0 0 35px 35px; box-shadow: var(--shadow); }
+        .header { background: var(--card); padding: 60px 25px 25px;
+            border-radius: 0 0 35px 35px; box-shadow: var(--shadow); transition: background 0.3s, box-shadow 0.3s; }
         .card { background: var(--card);
             margin: 15px; padding: 20px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid rgba(0,0,0,0.02);
+            transition: background 0.3s, color 0.3s, border-color 0.3s, box-shadow 0.3s;
         }
         .card.route-card { padding: 15px 12px; }
         .date-scroll { display: flex; gap: 12px; overflow-x: auto; padding: 20px; scrollbar-width: none;
@@ -94,12 +100,24 @@
             border: 1px solid #e2e8f0; position: relative; }
         .shopping-img-box { position: relative; height: 130px; background: #f1f5f9; border-radius: 15px; overflow: hidden; display: flex; align-items: center; justify-content: center; }
         .shopping-img { width: 100%; height: 100%; object-fit: cover; cursor: zoom-in; }
-        .shopping-upload-btn { position: absolute; bottom: 8px; right: 8px; background: rgba(15, 23, 42, 0.6); color: white; border: none; width: 28px; height: 28px; border-radius: 50%; font-size: 14px; display: flex; align-items: center; justify-content: center; cursor: pointer; backdrop-filter: blur(4px); }
+        body.dark-theme .dock { background: #1e293b; border: 1px solid rgba(255,255,255,0.05); }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
 
 <div id="app" v-cloak>
+    <!-- 全域奢華主題切換按鈕 -->
+    <div style="position: fixed; top: 15px; right: 15px; z-index: 1500;">
+        <button @click="toggleTheme" style="border: none; background: var(--card); color: var(--text); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.15); transition: 0.3s; border: 1px solid rgba(0,0,0,0.05); backdrop-filter: blur(4px);">
+            {{ isDark ? '☀️' : '🌙' }}
+        </button>
+    </div>
+    
     <div v-if="activeTab === 'itinerary'">
         <header class="header">
             <input v-model="tripName" style="font-size: 28px; font-weight: 900; letter-spacing: -1px;" placeholder="行程名稱">
@@ -160,9 +178,16 @@
                                 <div class="drag-handle" style="margin-right:15px; opacity:0.2;">☰</div>
                                 <div style="flex:1">
                                     <div style="font-weight:900; font-size:17px;">{{ element.name || '未命名項目' }}</div>
-                                    <div style="font-size:13px; font-weight:700; color:var(--primary);">
-                                        {{ element.startH }}:{{ element.startM }} - {{ element.endH }}:{{ element.endM }} 
+                                    <div style="font-size:13px; font-weight:700; color:var(--primary); display:flex; align-items:center; gap:6px; flex-wrap:wrap; margin-top:2px;">
+                                        <span>{{ element.startH }}:{{ element.startM }} - {{ element.endH }}:{{ element.endM }}</span>
                                         <span v-if="element.trans && element.trans !== '空白'">‧ {{ getTransIcon(element.trans) }}</span>
+                                        
+                                        <!-- 時間衝突智慧警告 -->
+                                        <span v-if="checkOverlap(element, index)" 
+                                              style="background:#fef2f2; color:#ef4444; border: 1px solid #fee2e2; font-size:10px; font-weight:900; padding:2px 6px; border-radius:6px; display:inline-flex; align-items:center; gap:2px; animation: pulse 2s infinite; box-shadow: 0 2px 4px rgba(239, 68, 68, 0.05);">
+                                            <span>⚠️</span>
+                                            <span>時間重疊</span>
+                                        </span>
                                     </div>
                                 </div>
                                 <button @click="openEdit('itinerary', element, index)" style="border:none; background:none; font-size:10px; opacity:0.3;">✏️</button>
@@ -230,6 +255,12 @@
                     </button>
                 </div>
             </div>
+            
+            <!-- 🚀 啟動手機 APP 導航按鈕 -->
+            <button v-if="filteredRoutes.length >= 2" @click="launchWholeDayNavigation" 
+                    style="margin-bottom: 12px; width: 100%; padding: 12px; border: none; background: linear-gradient(135deg, #4f46e5, #06b6d4); color: white; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.2); transition: 0.3s; z-index: 5;">
+                <span>🚀 啟動 Google Maps 整日導航</span>
+            </button>
             
             <div v-if="filteredRoutes.length > 0" class="map-container">
                 <iframe width="100%" height="100%" frameborder="0" style="border:0" :src="inlineMapUrl" allowfullscreen></iframe>
@@ -376,21 +407,57 @@
 
     <div v-if="activeTab === 'shopping'">
         <header class="header"><h1>購物清單</h1></header>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:15px;">
-            <div v-for="(item, si) in shopping" :key="si" class="card" style="margin:0; padding:12px;">
-                <div class="shopping-img-box">
-                    <img v-if="item.img" :src="item.img" class="shopping-img" @click="viewImage(item.img)">
-                    <span v-else style="font-size:30px; opacity:0.2; cursor:pointer;" @click="triggerFile(si)">📸</span>
-                    <button v-if="item.img" class="shopping-upload-btn" @click.stop="triggerFile(si)">🔄</button>
-                    <input type="file" :id="'file-'+si" style="display:none" accept="image/*" @change="uploadImg($event, si)">
+        
+        <div style="padding: 15px 15px 0;">
+            <!-- 購物預算與總花費面板 -->
+            <div class="card" style="background: linear-gradient(135deg, #10b981, #059669); color: white; display: flex; justify-content: space-between; align-items: center; margin: 0; padding: 20px; box-shadow: 0 10px 20px rgba(16, 185, 129, 0.2); border: none;">
+                <div>
+                    <div style="font-size: 11px; font-weight: 800; opacity: 0.85; margin-bottom: 4px; letter-spacing: 0.5px;">🛍️ 購物累計預估花費</div>
+                    <div style="font-size: 26px; font-weight: 900; letter-spacing: -0.5px;">NT$ {{ totalShoppingCost }}</div>
                 </div>
-                <input v-model="item.name" placeholder="品名" style="font-weight:800; font-size:14px; margin-top:10px;">
-                <div style="display:flex; align-items:center; color:#10b981; font-weight:900;">
-                    <span>$</span><input v-model="item.price" type="number" placeholder="0">
+                <div style="text-align: right;">
+                    <div style="font-size: 10px; font-weight: 800; opacity: 0.85; margin-bottom: 2px;">品項數量</div>
+                    <div style="font-size: 18px; font-weight: 900;">{{ shopping.length }} 件</div>
                 </div>
-                <button @click="shopping.splice(si,1)" style="font-size:10px; color:#cbd5e1; margin-top:5px; background:none; border:none;">移除</button>
             </div>
-            <button @click="shopping.push({name:'', price:0, img:null})" style="height:200px; border:2px dashed #cbd5e1; border-radius:24px; color:#cbd5e1; font-size:30px; background:none;">＋</button>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:15px;">
+            <div v-for="(item, si) in shopping" :key="si" class="card" style="margin:0; padding:12px; display:flex; flex-direction:column; justify-content:space-between; border: 1px solid rgba(0,0,0,0.02);">
+                <div>
+                    <div class="shopping-img-box">
+                        <img v-if="item.img" :src="item.img" class="shopping-img" @click="viewImage(item.img)">
+                        <span v-else style="font-size:30px; opacity:0.2; cursor:pointer;" @click="triggerFile(si)">📸</span>
+                        <button v-if="item.img" class="shopping-upload-btn" @click.stop="triggerFile(si)">🔄</button>
+                        <input type="file" :id="'file-'+si" style="display:none" accept="image/*" @change="uploadImg($event, si)">
+                    </div>
+                    <input v-model="item.name" placeholder="品名" style="font-weight:800; font-size:14px; margin-top:10px;">
+                    
+                    <!-- 幣別與價格輸入 -->
+                    <div style="display:flex; flex-direction:column; gap:4px; margin-top:8px;">
+                        <div style="display:flex; align-items:center; gap:4px;">
+                            <select v-model="item.currency" style="width: 55px; background:#f1f5f9; border-radius:8px; padding:4px 2px; font-weight:800; font-size:11px; color:var(--text); text-align:center;">
+                                <option value="TWD">TWD</option>
+                                <option v-for="(v, k) in rates" :value="k">{{k}}</option>
+                            </select>
+                            <div style="display:flex; align-items:center; background:#f1f5f9; border-radius:8px; padding:4px 8px; flex:1;">
+                                <span style="font-size:11px; font-weight:800; color:var(--sub); margin-right:2px;">$</span>
+                                <input v-model.number="item.price" type="number" placeholder="0" style="font-weight:900; font-size:13px; color:#10b981;">
+                            </div>
+                        </div>
+                        
+                        <!-- 台幣換算小字 -->
+                        <div v-if="item.currency && item.currency !== 'TWD'" style="font-size: 10px; font-weight: 800; color: var(--sub); text-align: right; padding-right: 4px;">
+                            折合: <span style="color:#10b981;">NT$ {{ convertToTWD(item.price, item.currency) }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px; border-top: 1px solid #f1f5f9; padding-top:6px;">
+                    <button @click="shopping.splice(si,1)" style="font-size:10px; color:#cbd5e1; background:none; border:none; cursor:pointer; font-weight:800;">移除</button>
+                </div>
+            </div>
+            <button @click="shopping.push({name:'', price:0, img:null, currency:'TWD'})" style="height:210px; border:2px dashed #cbd5e1; border-radius:24px; color:#cbd5e1; font-size:30px; background:none; cursor:pointer;">＋</button>
         </div>
     </div>
 
@@ -606,6 +673,7 @@ createApp({
         const routeFilters = ref(['景點','飲食','航班','住宿','交通','其他']);
         const defaultTravelMode = ref('r');
         const focusedLocation = ref(null);
+        const isDark = ref(false);
         const showImgModal = ref(false);
         const previewImgSrc = ref('');
 
@@ -630,7 +698,12 @@ createApp({
                     transport.value = parsed.transport || { hotels: [], cars: [] };
                     checklist.value = parsed.checklist || [];
                     todos.value = parsed.todos || [];
-                    shopping.value = parsed.shopping || [];
+                    shopping.value = (parsed.shopping || []).map(item => ({
+                        name: item.name || '',
+                        price: item.price || 0,
+                        img: item.img || null,
+                        currency: item.currency || 'TWD'
+                    }));
                     if(parsed.rates) rates.value = parsed.rates;
                     weatherCity.value = parsed.weatherCity || '';
                     if(parsed.weatherList) weatherList.value = parsed.weatherList;
@@ -651,7 +724,14 @@ createApp({
 
         watch([tripName, tripDays, startDate, itineraryData, flightsList, transport, checklist, todos, shopping, weatherCity, weatherList], saveData, { deep: true });
 
-        onMounted(() => { loadData(); });
+        onMounted(() => { 
+            loadData(); 
+            const savedTheme = localStorage.getItem('travel_luxe_theme');
+            if (savedTheme === 'dark') {
+                isDark.value = true;
+                document.body.classList.add('dark-theme');
+            }
+        });
 
         const addCustomRate = () => {
             if(newCurrencyKey.value && newCurrencyValue.value) {
@@ -755,6 +835,77 @@ createApp({
                 return ta - tb;
             });
         };
+
+        const toggleTheme = () => {
+            isDark.value = !isDark.value;
+            if (isDark.value) {
+                document.body.classList.add('dark-theme');
+                localStorage.setItem('travel_luxe_theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-theme');
+                localStorage.setItem('travel_luxe_theme', 'light');
+            }
+        };
+
+        const checkOverlap = (item, idx) => {
+            const dayItems = itineraryData.value[selectedDateIndex.value] || [];
+            const curStart = parseInt(item.startH)*60 + parseInt(item.startM);
+            const curEnd = parseInt(item.endH)*60 + parseInt(item.endM);
+            
+            for (let i = 0; i < dayItems.length; i++) {
+                if (i === idx) continue;
+                const other = dayItems[i];
+                const otherStart = parseInt(other.startH)*60 + parseInt(other.startM);
+                const otherEnd = parseInt(other.endH)*60 + parseInt(other.endM);
+                
+                if (curStart < otherEnd && curEnd > otherStart) {
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        const launchWholeDayNavigation = () => {
+            if (filteredRoutes.value.length < 2) {
+                alert('今日行程需要至少 2 個有地點的項目才能規劃導航！');
+                return;
+            }
+            const locList = filteredRoutes.value.map(r => r.location.trim()).filter(l => l !== '');
+            if (locList.length < 2) {
+                alert('今日行程需要至少 2 個有效的地點才能規劃導航！');
+                return;
+            }
+            const origin = encodeURIComponent(locList[0]);
+            const destination = encodeURIComponent(locList[locList.length - 1]);
+            let waypoints = '';
+            if (locList.length > 2) {
+                waypoints = '&waypoints=' + locList.slice(1, -1).map(l => encodeURIComponent(l)).join('|');
+            }
+            
+            const modeMap = { 'r': 'transit', 'w': 'walking', 'd': 'driving' };
+            const mode = modeMap[defaultTravelMode.value] || 'transit';
+            
+            const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}${waypoints}&travelmode=${mode}`;
+            window.open(url, '_blank');
+        };
+
+        const convertToTWD = (price, currency) => {
+            if (!price) return 0;
+            if (currency === 'TWD') return price;
+            const rate = rates.value[currency];
+            if (!rate) return price;
+            return Math.round(price / rate);
+        };
+
+        const totalShoppingCost = computed(() => {
+            let total = 0;
+            (shopping.value || []).forEach(item => {
+                const currency = item.currency || 'TWD';
+                const price = item.price || 0;
+                total += convertToTWD(price, currency);
+            });
+            return total.toLocaleString();
+        });
 
         const twd = ref(1000);
         const target = ref(0);
@@ -1029,7 +1180,7 @@ createApp({
 
         calcT();
 
-        return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, addCheck, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, generateCompactExport, exportToFile, triggerImportFile, importFromFile, importData, exportString, importString, weatherCity, weatherList, fetchWeather, currentWeather, openGoogleWeather, viewImage, routeFilters, filteredRoutes, toggleRouteFilter, inlineMapUrl, defaultTravelMode, focusedLocation, newCurrencyKey, newCurrencyValue, addCustomRate, showImgModal, previewImgSrc, newCheck, newTodo, formatDateMD };
+        return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, addCheck, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, generateCompactExport, exportToFile, triggerImportFile, importFromFile, importData, exportString, importString, weatherCity, weatherList, fetchWeather, currentWeather, openGoogleWeather, viewImage, routeFilters, filteredRoutes, toggleRouteFilter, inlineMapUrl, defaultTravelMode, focusedLocation, isDark, toggleTheme, checkOverlap, launchWholeDayNavigation, convertToTWD, totalShoppingCost, newCurrencyKey, newCurrencyValue, addCustomRate, showImgModal, previewImgSrc, newCheck, newTodo, formatDateMD };
     }
 })
 .component('draggable', window.vuedraggable)
