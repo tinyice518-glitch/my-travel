@@ -522,7 +522,7 @@
                     <h4 style="margin:0 0 10px; font-size:13px; font-weight:800;">📥 匯入外部行程</h4>
                     
                     <!-- 代碼貼上匯入 -->
-                    <textarea v-model="importString" style="background:white; border:1px solid #cbd5e1; border-radius:12px; padding:10px; font-size:10px; height:60px; width:100%; box-sizing:border-box;" placeholder="貼上「極簡代碼」或「舊版長代碼」..."></textarea>
+                    <textarea v-model="importString" style="background:white; border:1px solid #cbd5e1; border-radius:12px; padding:10px; font-size:10px; height:60px; width:100%; box-sizing:border-box;" placeholder="貼上舊版分享代碼..."></textarea>
                     <button @click="importData" class="btn-action" style="background:var(--text); color:white; margin-top:8px; padding:10px; font-size:13px; border-radius:10px;">貼上代碼執行匯入</button>
                     
                     <!-- 分隔線 -->
@@ -1139,29 +1139,50 @@ createApp({
         const importFromFile = (e) => {
             const file = e.target.files[0];
             if (!file) return;
+
             const reader = new FileReader();
+
             reader.onload = (evt) => {
                 try {
                     const decoded = JSON.parse(evt.target.result);
+
                     if (confirm('確定匯入並覆蓋目前行程嗎？')) {
-                        tripName.value = decoded.tripName; 
-                        tripDays.value = decoded.tripDays; 
-                        startDate.value = decoded.startDate; 
-                        itineraryData.value = decoded.itinerary; 
-                        flightsList.value = decoded.flightsList; 
-                        transport.value = decoded.transport; 
-                        checklist.value = decoded.checklist; 
-                        todos.value = decoded.todos || []; 
-                        shopping.value = decoded.shopping; 
-                        rates.value = decoded.rates; 
-                        weatherCity.value = decoded.weatherCity || ''; 
-                        fetchWeather();
+                        tripName.value = decoded.tripName || '';
+                        tripDays.value = decoded.tripDays || 5;
+                        startDate.value = decoded.startDate || '2026-05-24';
+
+                        itineraryData.value = decoded.itinerary || {};
+                        flightsList.value = decoded.flightsList || [];
+                        transport.value = decoded.transport || { hotels: [], cars: [] };
+                        checklist.value = decoded.checklist || [];
+                        todos.value = decoded.todos || [];
+
+                        shopping.value = (decoded.shopping || []).map(item => ({
+                            name: item.name || '',
+                            price: item.price || 0,
+                            img: item.img || null,
+                            currency: item.currency || 'TWD'
+                        }));
+
+                        rates.value = decoded.rates || rates.value;
+                        weatherCity.value = decoded.weatherCity || '';
+                        weatherList.value = decoded.weatherList || [];
+
+                        initArrays();
+                        saveData();
+
+                        if (weatherCity.value && weatherList.value.length === 0) {
+                            fetchWeather();
+                        }
+
                         alert('行程檔案匯入成功！');
                     }
-                } catch(err) {
+                } catch (err) {
+                    console.error(err);
                     alert('無效的行程檔案格式。');
                 }
             };
+
             reader.readAsText(file);
             e.target.value = '';
         };
@@ -1180,7 +1201,7 @@ createApp({
 
         calcT();
 
-        return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, addCheck, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, generateCompactExport, exportToFile, triggerImportFile, importFromFile, importData, exportString, importString, weatherCity, weatherList, fetchWeather, currentWeather, openGoogleWeather, viewImage, routeFilters, filteredRoutes, toggleRouteFilter, inlineMapUrl, defaultTravelMode, focusedLocation, isDark, toggleTheme, checkOverlap, launchWholeDayNavigation, convertToTWD, totalShoppingCost, newCurrencyKey, newCurrencyValue, addCustomRate, showImgModal, previewImgSrc, newCheck, newTodo, formatDateMD };
+        return { activeTab, tripName, tripDays, startDate, selectedDateIndex, dates, itineraryData, flightsList, transport, checklist, todos, shopping, showModal, modalType, editData, editIdx, openAdd, openEdit, saveItem, handleDelete, calcGap, twd, target, curKey, rates, calcT, calcTwd, fetchRates, addCheck, addTodo, triggerFile, uploadImg, triggerItineraryFile, uploadItineraryImg, openMap, getIcon, getTransIcon, generateExport, exportToFile, triggerImportFile, importFromFile, importData, exportString, importString, weatherCity, weatherList, fetchWeather, currentWeather, openGoogleWeather, viewImage, routeFilters, filteredRoutes, toggleRouteFilter, inlineMapUrl, defaultTravelMode, focusedLocation, isDark, toggleTheme, checkOverlap, launchWholeDayNavigation, convertToTWD, totalShoppingCost, newCurrencyKey, newCurrencyValue, addCustomRate, showImgModal, previewImgSrc, newCheck, newTodo, formatDateMD };
     }
 })
 .component('draggable', window.vuedraggable)
